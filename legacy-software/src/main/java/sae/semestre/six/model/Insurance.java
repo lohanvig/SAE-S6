@@ -1,6 +1,8 @@
 package sae.semestre.six.model;
 
 import jakarta.persistence.*;
+import sae.semestre.six.patient.model.Patient;
+
 import java.util.Date;
 
 @Entity
