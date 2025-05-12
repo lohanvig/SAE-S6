@@ -1,9 +1,9 @@
 package sae.semestre.six.controller;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import sae.semestre.six.bill.controller.BillingController;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 
 public class BillingControllerTest {
