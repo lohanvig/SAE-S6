@@ -34,14 +34,45 @@ public class Doctor {
     @Column(name = "department")
     private String department;
 
+    @Column(name = "startHour")
+    private int workStartHour;
+
+    @Column(name = "endHour")
+    private int workEndHour;
+
     @OneToMany(mappedBy = "doctor", fetch = FetchType.LAZY)
     private Set<Appointment> appointments;
 
     
     public Doctor() {
+        this.workStartHour = 9;
+        this.workEndHour = 17;
     }
 
-    
+    public int getWorkStartHour() {
+        return workStartHour;
+    }
+
+    public void setWorkStartHour(int workStartHour) {
+        if (workStartHour > workEndHour || workStartHour < 0 || workStartHour > 23) {
+            throw new IllegalArgumentException("La date de début de travail d'un docteur doit être comprise entre 0 " +
+                    "et 23 heure et doit être inférieure à celle de fin.");
+        }
+        this.workStartHour = workStartHour;
+    }
+
+    public int getWorkEndHour() {
+        return workEndHour;
+    }
+
+    public void setWorkEndHour(int workEndHour) {
+        if (workEndHour < workStartHour || workEndHour < 0 || workEndHour > 23) {
+            throw new IllegalArgumentException("La date de fin de travail d'un docteur doit être comprise entre 0 " +
+                    "et 23 heure et doit être supérieure à celle de début.");
+        }
+        this.workEndHour = workEndHour;
+    }
+
     public Long getId() {
         return id;
     }
