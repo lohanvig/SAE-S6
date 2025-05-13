@@ -31,8 +31,6 @@ import java.util.*;
 @Service
 public class AppointmentService {
 
-    private static final int MIN_APPOINTMENT_HOUR = 9;
-    private static final int MAX_APPOINTMENT_HOUR = 17;
     private final AppointmentDao appointmentDao;
     private final DoctorDao doctorDao;
     private final EmailService emailService = EmailService.getInstance();
@@ -64,27 +62,29 @@ public class AppointmentService {
     public Appointment scheduleAppointment(Long doctorId, Long patientId, Date appointmentDate) {
         Doctor doctor = doctorDao.findById(doctorId);
         if (doctor == null) {
-            throw new IllegalArgumentException("Doctor not found");
+            throw new IllegalArgumentException("Médecin non trouvé");
         }
 
         List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctorId);
         for (Appointment existing : doctorAppointments) {
             if (existing.getAppointmentDate().equals(appointmentDate)) {
-                throw new UnvailableException("Le docteur n'est pas disponible à ce créneau.");
+                throw new UnvailableException("Le médecin n'est pas disponible à ce créneau.");
             }
         }
 
         Patient patient = patientDao.findByPatientNumber(patientId + "");
         if (patient == null) {
-            throw new IllegalArgumentException("Patient not found");
+            throw new IllegalArgumentException("Patient non trouvé");
         }
 
         Calendar cal = Calendar.getInstance();
         cal.setTime(appointmentDate);
         int hour = cal.get(Calendar.HOUR_OF_DAY);
-        if (hour < MIN_APPOINTMENT_HOUR || hour > MAX_APPOINTMENT_HOUR) {
+
+        // Vérification de l'heure de disponibilité du médecin
+        if (hour < doctor.getWorkStartHour() || hour >= doctor.getWorkEndHour()) {
             throw new UnvailableException("Les créneaux sont uniquement réservables entre "
-                    + MIN_APPOINTMENT_HOUR + "h00 et " + MAX_APPOINTMENT_HOUR + "h00.");
+                    + doctor.getWorkStartHour() + "h00 et " + doctor.getWorkEndHour() + "h00.");
         }
 
         // Création et sauvegarde du rendez-vous
@@ -101,8 +101,8 @@ public class AppointmentService {
 
         emailService.sendEmail(
                 doctor.getEmail(),
-                "New Appointment Scheduled",
-                "You have a new appointment scheduled on " + appointmentDate
+                "Nouveau rendez-vous planifié",
+                "Vous avez un nouveau rendez-vous prévu pour le " + appointmentDate
         );
 
         return appointment;
@@ -115,13 +115,27 @@ public class AppointmentService {
      * @param date     Date cible pour les créneaux disponibles
      * @return Liste {@link List<Date>} des créneaux horaires disponibles
      */
+    /**
+     * Retourne les créneaux horaires disponibles pour un médecin à une date donnée.
+     *
+     * @param doctorId ID du médecin
+     * @param date     Date cible pour les créneaux disponibles
+     * @return Liste {@link List<Date>} des créneaux horaires disponibles
+     */
     public List<Date> getAvailableSlots(Long doctorId, Date date) {
+        // Récupération du médecin à partir de son ID
+        Doctor doctor = doctorDao.findById(doctorId);
+        if (doctor == null) {
+            throw new IllegalArgumentException("Médecin non trouvé");
+        }
+
         List<Appointment> appointments = appointmentDao.findByDoctorId(doctorId);
         List<Date> availableSlots = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
 
-        for (int hour = MIN_APPOINTMENT_HOUR; hour <= MAX_APPOINTMENT_HOUR; hour++) {
+        // Vérification des créneaux horaires disponibles entre les horaires de travail du médecin
+        for (int hour = doctor.getWorkStartHour(); hour < doctor.getWorkEndHour(); hour++) {
             cal.set(Calendar.HOUR_OF_DAY, hour);
             cal.set(Calendar.MINUTE, 0);
             int finalHour = hour;
