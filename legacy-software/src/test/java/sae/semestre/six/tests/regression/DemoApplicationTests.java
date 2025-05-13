@@ -1,4 +1,4 @@
-package sae.semestre.six;
+package sae.semestre.six.tests.regression;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
