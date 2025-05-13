@@ -37,19 +37,19 @@ public class AppointmentController {
     /**
      * Planifie un rendez-vous médical entre un patient et un médecin à une date précise.
      *
-     * @param doctorId        {@link Long} identifiant unique du médecin
-     * @param patientId       {@link Long} identifiant unique du patient
+     * @param doctorNumber        {@link String} identifiant unique du médecin
+     * @param patientNumber       {@link String} identifiant unique du patient
      * @param appointmentDate {@link Date} date et heure du rendez-vous souhaité
      * @return {@link ResponseEntity} contenant un {@link Appointment} en cas de succès,
      *         ou un message d'erreur en cas d'échec
      */
     @PostMapping("/appointment")
     public ResponseEntity<?> scheduleAppointment(
-            @RequestParam Long doctorId,
-            @RequestParam Long patientId,
+            @RequestParam String doctorNumber,
+            @RequestParam String patientNumber,
             @RequestParam Date appointmentDate) {
         try {
-            Appointment result = appointmentService.scheduleAppointment(doctorId, patientId, appointmentDate);
+            Appointment result = appointmentService.scheduleAppointment(doctorNumber, patientNumber, appointmentDate);
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -61,38 +61,38 @@ public class AppointmentController {
     /**
      * Récupère les créneaux horaires disponibles pour un médecin à une date donnée.
      *
-     * @param doctorId {@link Long} identifiant unique du médecin
+     * @param doctorNumber {@link String} identifiant unique du médecin
      * @param date     {@link Date} date cible pour laquelle vérifier les créneaux disponibles
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Date}
      *         représentant les heures disponibles
      */
     @GetMapping("/available-slots")
     public ResponseEntity<List<Date>> getAvailableSlots(
-            @RequestParam Long doctorId,
+            @RequestParam String doctorNumber,
             @RequestParam Date date) {
-        return ResponseEntity.ok(appointmentService.getAvailableSlots(doctorId, date));
+        return ResponseEntity.ok(appointmentService.getAvailableSlots(doctorNumber, date));
     }
 
     /**
      * Récupère tous les rendez-vous associés à un patient donné.
      *
-     * @param patientId {@link Long} identifiant unique du patient
+     * @param patientNumber {@link String} identifiant unique du patient
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Appointment}
      */
     @GetMapping("/appointments/patient/{patientId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByPatientId(@PathVariable Long patientId) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByPatientId(patientId));
+    public ResponseEntity<List<Appointment>> getAppointmentsByPatientId(@PathVariable String patientNumber) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsByPatientId(patientNumber));
     }
 
     /**
      * Récupère tous les rendez-vous associés à un médecin donné.
      *
-     * @param doctorId {@link Long} identifiant unique du médecin
+     * @param doctorNumber {@link String} identifiant unique du médecin
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Appointment}
      */
     @GetMapping("/appointments/doctor/{doctorId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByDoctorId(@PathVariable Long doctorId) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByDoctorId(doctorId));
+    public ResponseEntity<List<Appointment>> getAppointmentsByDoctorId(@PathVariable String doctorNumber) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsByDoctorId(doctorNumber));
     }
 
     /**

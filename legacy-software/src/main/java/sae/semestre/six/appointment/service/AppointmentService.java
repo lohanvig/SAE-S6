@@ -53,26 +53,26 @@ public class AppointmentService {
     /**
      * Planifie un rendez-vous pour un médecin et un patient à une date donnée.
      *
-     * @param doctorId        ID du médecin
-     * @param patientId       ID du patient
+     * @param doctorNumber        numéro du médecin
+     * @param patientNumber       numéro du patient
      * @param appointmentDate Date du rendez-vous
      * @return {@link Appointment} objet représentant le rendez-vous créé
      * @throws UnvailableException Si le créneau est déjà réservé ou si l'heure est hors des plages permises
      */
-    public Appointment scheduleAppointment(Long doctorId, Long patientId, Date appointmentDate) {
-        Doctor doctor = doctorDao.findById(doctorId);
+    public Appointment scheduleAppointment(String doctorNumber, String patientNumber, Date appointmentDate) {
+        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber);
         if (doctor == null) {
             throw new IllegalArgumentException("Médecin non trouvé");
         }
 
-        List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctorId);
+        List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctor.getId());
         for (Appointment existing : doctorAppointments) {
             if (existing.getAppointmentDate().equals(appointmentDate)) {
                 throw new UnvailableException("Le médecin n'est pas disponible à ce créneau.");
             }
         }
 
-        Patient patient = patientDao.findByPatientNumber(patientId + "");
+        Patient patient = patientDao.findByPatientNumber(patientNumber);
         if (patient == null) {
             throw new IllegalArgumentException("Patient non trouvé");
         }
@@ -111,25 +111,18 @@ public class AppointmentService {
     /**
      * Retourne les créneaux horaires disponibles pour un médecin à une date donnée.
      *
-     * @param doctorId ID du médecin
+     * @param doctorNumber numero du médecin
      * @param date     Date cible pour les créneaux disponibles
      * @return Liste {@link List<Date>} des créneaux horaires disponibles
      */
-    /**
-     * Retourne les créneaux horaires disponibles pour un médecin à une date donnée.
-     *
-     * @param doctorId ID du médecin
-     * @param date     Date cible pour les créneaux disponibles
-     * @return Liste {@link List<Date>} des créneaux horaires disponibles
-     */
-    public List<Date> getAvailableSlots(Long doctorId, Date date) {
+    public List<Date> getAvailableSlots(String doctorNumber, Date date) {
         // Récupération du médecin à partir de son ID
-        Doctor doctor = doctorDao.findById(doctorId);
+        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber);
         if (doctor == null) {
             throw new IllegalArgumentException("Médecin non trouvé");
         }
 
-        List<Appointment> appointments = appointmentDao.findByDoctorId(doctorId);
+        List<Appointment> appointments = appointmentDao.findByDoctorId(doctor.getId());
         List<Date> availableSlots = new ArrayList<>();
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -170,20 +163,31 @@ public class AppointmentService {
     /**
      * Retourne la liste des rendez-vous d'un médecin donné.
      *
-     * @param doctorId ID du médecin
+     * @param doctorNumber numéro du médecin
      * @return Liste {@link List<Appointment>} des rendez-vous du médecin
      */
-    public List<Appointment> getAppointmentsByDoctorId(Long doctorId) {
-        return appointmentDao.findByDoctorId(doctorId);
+    public List<Appointment> getAppointmentsByDoctorId(String doctorNumber) {
+        // Récupération du médecin à partir de son numéro
+        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber);
+        if (doctor == null) {
+            throw new IllegalArgumentException("Médecin non trouvé");
+        }
+        return appointmentDao.findByDoctorId(doctor.getId());
     }
 
     /**
      * Retourne la liste des rendez-vous d'un patient donné.
      *
-     * @param patientId ID du patient
+     * @param patientNumber numéro du patient
      * @return Liste {@link List<Appointment>} des rendez-vous du patient
      */
-    public List<Appointment> getAppointmentsByPatientId(Long patientId) {
-        return appointmentDao.findByPatientId(patientId);
+    public List<Appointment> getAppointmentsByPatientId(String patientNumber) {
+        // Récupération du patient à partir de son numéro
+        Patient patient = patientDao.findByPatientNumber(patientNumber);
+        if (patient == null) {
+            throw new IllegalArgumentException("Patient non trouvé");
+        }
+
+        return appointmentDao.findByPatientId(patient.getId());
     }
 }
