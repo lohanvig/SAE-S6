@@ -4,16 +4,17 @@ import sae.semestre.six.base.dao.AbstractHibernateDao;
 import sae.semestre.six.doctor.model.Doctor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DoctorDaoImpl extends AbstractHibernateDao<Doctor, Long> implements DoctorDao {
     
     @Override
-    public Doctor findByDoctorNumber(String doctorNumber) {
-        return (Doctor) getEntityManager()
+    public Optional<Doctor> findByDoctorNumber(String doctorNumber) {
+        return Optional.ofNullable((Doctor) getEntityManager()
                 .createQuery("FROM Doctor WHERE doctorNumber = :doctorNumber")
                 .setParameter("doctorNumber", doctorNumber)
-                .getSingleResult();
+                .getSingleResult());
     }
     
     @Override
@@ -32,5 +33,13 @@ public class DoctorDaoImpl extends AbstractHibernateDao<Doctor, Long> implements
                 .createQuery("FROM Doctor WHERE department = :department")
                 .setParameter("department", department)
                 .getResultList();
+    }
+
+    @Override
+    public Optional<Long> findDoctorIdByDoctorNumber(String doctorNumber) {
+        return Optional.ofNullable(getEntityManager()
+                .createQuery("SELECT d.id FROM Doctor d WHERE d.doctorNumber = :doctorNumber", Long.class)
+                .setParameter("doctorNumber", doctorNumber)
+                .getSingleResult());
     }
 } 

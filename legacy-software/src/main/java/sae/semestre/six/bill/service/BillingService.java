@@ -1,11 +1,10 @@
 package sae.semestre.six.bill.service;
 
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sae.semestre.six.bill.dao.BillDaoImpl;
-import sae.semestre.six.bill.dto.BillDto;
 import sae.semestre.six.bill.model.Bill;
 import sae.semestre.six.bill.model.BillDetail;
 import sae.semestre.six.doctor.dao.DoctorDao;
@@ -13,14 +12,12 @@ import sae.semestre.six.doctor.model.Doctor;
 import sae.semestre.six.patient.dao.PatientDao;
 import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.service.EmailService;
+import sae.semestre.six.utils.FileInitializer;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Service dédié à la gestion de la facturation des patients.
@@ -69,29 +66,25 @@ public class BillingService {
      */
     private final static float DISCOUNT_RATE = 0.9f;
 
-    /**
-     * Chemin du fichier de la facture
-     */
-    private static String billFilePath = "C:\\hospital\\";
-
 
     /**
      * Traite la facturation d'un patient à partir des traitements reçus
      * et retourne une réponse JSON avec le détail de la facture.
      *
      * @param patientId  identifiant du patient
-     * @param doctorId   identifiant du médecin
+     * @param doctorNumber   identifiant du médecin
      * @param treatments liste des traitements appliqués
      * @return un objet contenant le numéro de facture, le total, les identifiants et traitements
      * @throws IOException en cas d'erreur d'écriture du fichier de facturation
      */
-    public BillDto processBill(String patientId, String doctorId, String[] treatments) throws IOException {
+    @Transactional
+    public String processBill(String patientId, String doctorNumber, String[] treatments) throws IOException {
         // Chargement des entités Patient et Doctor depuis la base de données
-        Patient patient = patientDao.findByPatientNumber(patientId);
-        Doctor doctor = doctorDao.findByDoctorNumber(doctorId);
+        Patient patient = patientDao.findByPatientNumber(patientId)
+                                    .orElseThrow(() -> new NoSuchElementException("Patient non trouvé"));
 
-        // Initialisation des relations Hibernate (évite LazyInitializationException)
-        Hibernate.initialize(doctor.getAppointments());
+        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber)
+                                 .orElseThrow(() -> new NoSuchElementException("Médecin non trouvé"));
 
         // Création de la facture
         Bill bill = new Bill();
@@ -102,7 +95,7 @@ public class BillingService {
         double total = 0.0;
         Set<BillDetail> details = new HashSet<>();
 
-        // Création des lignes de facture (traitement + prix)
+        // Création des lignes de facture
         for (String treatment : treatments) {
             double price = priceList.getOrDefault(treatment, 0.0);
             total += price;
@@ -114,7 +107,7 @@ public class BillingService {
             details.add(detail);
         }
 
-        // Application d'une remise si le total dépasse un montant
+        // Application d'une remise si le total dépasse un montant max
         if (total > DISCOUNT_AMOUNT) {
             total *= DISCOUNT_RATE;
         }
@@ -123,7 +116,7 @@ public class BillingService {
         bill.setBillDetails(details);
 
         // Écriture dans un fichier texte de sauvegarde
-        File billFile = new File(billFilePath + bill.getBillNumber());
+        File billFile = new File(FileInitializer.BILL_FOLDER + bill.getBillNumber() + ".txt");
 
         // Vérifier si le fichier existe, sinon le créer
         if (!billFile.exists()) {
@@ -148,13 +141,6 @@ public class BillingService {
                 "Bill Number: " + bill.getBillNumber() + "\nTotal: $" + total
         );
 
-        // Retour d’une réponse JSON structurée
-        return new BillDto(
-                bill.getBillNumber(),
-                total,
-                patientId,
-                doctorId,
-                new HashSet<>(Arrays.asList(treatments))
-        );
+        return bill.getBillNumber();
     }
 } 
