@@ -6,6 +6,7 @@ import sae.semestre.six.appointment.dao.AppointmentDao;
 import sae.semestre.six.room.dao.RoomDao;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.room.model.Room;
+import sae.semestre.six.room.service.RoomService;
 
 import java.util.*;
 
@@ -18,42 +19,45 @@ public class RoomController {
     
     @Autowired
     private AppointmentDao appointmentDao;
-    
-    
-    @PostMapping("/assign")
-    public String assignRoom(@RequestParam Long appointmentId, @RequestParam String roomNumber) {
-        try {
-            Room room = roomDao.findByRoomNumber(roomNumber);
-            Appointment appointment = appointmentDao.findById(appointmentId);
-            
-            
-            if (room.getType().equals("SURGERY") && 
-                !appointment.getDoctor().getSpecialization().equals("SURGEON")) {
-                return "Error: Only surgeons can use surgery rooms";
+
+    @Autowired
+    private RoomService roomService;
+
+    /**
+     * Route permettant de récupérer les salles disponible à une date donnée.
+     *
+     * @param appointmentDate La date de début du rendez-vous
+     * @param durationMinutes La durée du rendez-vous en minutes
+     * @return Liste des salles disponibles pour le créneau donné
+     */
+    @GetMapping("/available")
+    public List<Map<String, Object>> getAvailableRooms(@RequestParam String roomNumber,
+                                                       @RequestParam Date appointmentDate,
+                                                       @RequestParam int durationMinutes) {
+        List<Map<String, Object>> availableRooms = new ArrayList<>();
+        List<Room> rooms = roomDao.findAll();
+
+        for (Room room : rooms) {
+            boolean isAvailable = roomService.isRoomAvailable(room, appointmentDate, durationMinutes);
+            if (isAvailable) {
+                Map<String, Object> roomInfo = new HashMap<>();
+                roomInfo.put("roomNumber", room.getRoomNumber());
+                roomInfo.put("capacity", room.getCapacity());
+                roomInfo.put("currentPatients", room.getCurrentPatientCount());
+                availableRooms.add(roomInfo);
             }
-            
-            
-            if (room.getCurrentPatientCount() >= room.getCapacity()) {
-                return "Error: Room is at full capacity";
-            }
-            
-            
-            room.setCurrentPatientCount(room.getCurrentPatientCount() + 1);
-            appointment.setRoomNumber(roomNumber);
-            
-            roomDao.update(room);
-            appointmentDao.update(appointment);
-            
-            return "Room assigned successfully";
-        } catch (Exception e) {
-            return "Error: " + e.getMessage();
         }
+
+        return availableRooms;
     }
-    
-    
+
     @GetMapping("/availability")
     public Map<String, Object> getRoomAvailability(@RequestParam String roomNumber) {
         Room room = roomDao.findByRoomNumber(roomNumber);
+        if (room == null) {
+
+        }
+
         Map<String, Object> result = new HashMap<>();
         
         result.put("roomNumber", room.getRoomNumber());

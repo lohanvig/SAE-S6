@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.appointment.service.AppointmentService;
+import sae.semestre.six.timeslot.TimeSlot;
 
 import java.util.Date;
 import java.util.List;
@@ -39,7 +40,9 @@ public class AppointmentController {
      *
      * @param doctorNumber        {@link String} identifiant unique du médecin
      * @param patientNumber       {@link String} identifiant unique du patient
-     * @param appointmentDate {@link Date} date et heure du rendez-vous souhaité
+     * @param appointmentDate     {@link Date} date et heure du rendez-vous souhaité
+     * @param roomNumber          {@link String} identifiant unique de la salle
+     * @param roomNumber          int durée du rdv en minutes
      * @return {@link ResponseEntity} contenant un {@link Appointment} en cas de succès,
      *         ou un message d'erreur en cas d'échec
      */
@@ -47,9 +50,11 @@ public class AppointmentController {
     public ResponseEntity<?> scheduleAppointment(
             @RequestParam String doctorNumber,
             @RequestParam String patientNumber,
-            @RequestParam Date appointmentDate) {
+            @RequestParam String roomNumber,
+            @RequestParam Date appointmentDate,
+            @RequestParam int duration) {
         try {
-            Appointment result = appointmentService.scheduleAppointment(doctorNumber, patientNumber, appointmentDate);
+            Appointment result = appointmentService.scheduleAppointment(doctorNumber, patientNumber, roomNumber, appointmentDate, duration);
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -67,7 +72,7 @@ public class AppointmentController {
      *         représentant les heures disponibles
      */
     @GetMapping("/available-slots")
-    public ResponseEntity<List<Date>> getAvailableSlots(
+    public ResponseEntity<List<TimeSlot>> getAvailableSlots(
             @RequestParam String doctorNumber,
             @RequestParam Date date) {
         return ResponseEntity.ok(appointmentService.getAvailableSlots(doctorNumber, date));
