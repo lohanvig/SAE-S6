@@ -5,11 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import sae.semestre.six.bill.controller.BillingController;
-import sae.semestre.six.bill.dto.BillDto;
 
 import static org.junit.jupiter.api.Assertions.*;
-import java.io.File;
-import java.io.IOException;
 
 @SpringBootTest
 public class BillingControllerTest {
@@ -28,10 +25,9 @@ public class BillingControllerTest {
 
         assertEquals(201, responseEntity.getStatusCodeValue(), "Le statut de la réponse doit être 201.");
 
-        BillDto response = (BillDto) responseEntity.getBody();
-        assertNotNull(response, "La réponse ne doit pas être nulle.");
-        assertTrue(response.getBillNumber().startsWith("BILL"), "Le numéro de facture doit commencer par 'BILL'.");
-        assertTrue(response.getTotalAmount() > 0, "Le montant total doit être supérieur à zéro.");
+        String id = (String) responseEntity.getBody();
+        assertNotNull(id, "La réponse ne doit pas être nulle.");
+        assertTrue(id.startsWith("BILL"), "Le numéro de facture doit commencer par 'BILL'.");
     }
 
     @Test

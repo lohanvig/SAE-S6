@@ -3,7 +3,6 @@ package sae.semestre.six.bill.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import sae.semestre.six.bill.dto.BillDto;
 import sae.semestre.six.bill.service.BillingService;
 import java.util.*;
 
@@ -31,8 +30,8 @@ public class BillingController {
             @RequestParam String doctorId,
             @RequestParam String[] treatments) {
         try {
-            BillDto response = billService.processBill(patientId, doctorId, treatments);
-            return ResponseEntity.status(201).body(response);
+            String number = billService.processBill(patientId, doctorId, treatments);
+            return ResponseEntity.status(201).body(Map.of("bill_number", number));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getMessage());
         }
