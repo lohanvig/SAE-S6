@@ -1,5 +1,6 @@
 package sae.semestre.six.inventory.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -69,6 +70,25 @@ public class InventoryService {
         }
 
         return lowStockItems;
+    }
+
+
+    @Transactional
+    public void verifyAndUpdatePrice(String itemCode, Double newPrice) {
+        if (newPrice == null || newPrice <= 0) {
+            throw new IllegalArgumentException("Price must be greater than zero.");
+        }
+
+        Inventory item = inventoryDao.findByItemCode(itemCode);
+        if (item == null) {
+            throw new IllegalArgumentException("Item not found: " + itemCode);
+        }
+
+        if (item.getUnitPrice().equals(newPrice)) {
+            throw new IllegalArgumentException("New price is the same as the current price.");
+        }
+
+        inventoryDao.updatePrice(itemCode, newPrice);
     }
 
 }

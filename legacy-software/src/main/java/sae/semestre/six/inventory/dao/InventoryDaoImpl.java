@@ -1,5 +1,6 @@
 package sae.semestre.six.inventory.dao;
 
+import jakarta.transaction.Transactional;
 import sae.semestre.six.base.dao.AbstractHibernateDao;
 import sae.semestre.six.inventory.model.Inventory;
 import org.springframework.stereotype.Repository;
@@ -48,6 +49,7 @@ public class InventoryDaoImpl extends AbstractHibernateDao<Inventory, Long> impl
     }
     
     @Override
+    @Transactional
     public void updatePrice(String itemCode, Double price) {
         
         getEntityManager()

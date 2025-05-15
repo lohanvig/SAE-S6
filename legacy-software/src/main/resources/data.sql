@@ -1,3 +1,15 @@
+DROP TRIGGER IF EXISTS after_price_update;
+
+CREATE TRIGGER after_price_update
+    AFTER UPDATE ON inventory
+    FOR EACH ROW
+BEGIN
+    -- Insérer seulement si les prix sont différents
+    INSERT INTO price_history (inventory_id, old_price, new_price, change_date)
+    SELECT NEW.id, OLD.unit_price, NEW.unit_price, NOW()
+    WHERE OLD.unit_price <> NEW.unit_price;
+END;
+
 -- Insertion des médecins
 INSERT INTO doctors (doctor_number, first_name, last_name, specialization, phone_number, email, department) VALUES
 ('DR001', 'Pierre', 'Dubois', 'Cardiologie', '0123456789', 'pierre.dubois@hopital.fr', 'Cardiologie'),
@@ -93,4 +105,4 @@ INSERT INTO inventory (item_code, name, quantity, unit_price, reorder_level, las
 ('PAN002', 'Sparadrap hypoallergénique', 150, 2.20, 30, '2024-02-01 10:00:00'),
 ('MED003', 'Bétabloquant 50mg', 300, 0.30, 100, '2024-02-01 10:00:00'),
 ('MED004', 'Sumatriptan 50mg', 200, 1.20, 50, '2024-02-01 10:00:00'),
-('PRO002', 'Masques chirurgicaux', 1000, 5.00, 200, '2024-02-01 10:00:00'); 
+('PRO002', 'Masques chirurgicaux', 1000, 5.00, 200, '2024-02-01 10:00:00');

@@ -86,4 +86,16 @@ public class InventoryController {
             return ResponseEntity.status(500).body("Error during reorder process: " + e.getMessage());
         }
     }
+
+    @PutMapping("/change-price/{itemCode}")
+    public ResponseEntity<?> changePriceItems(@PathVariable String itemCode, @RequestParam Double price) {
+        try {
+            inventoryService.verifyAndUpdatePrice(itemCode, price);
+            return ResponseEntity.ok("Price updated successfully for item: " + itemCode);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error updating price: " + e.getMessage());
+        }
+    }
 }
