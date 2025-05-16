@@ -6,6 +6,7 @@ import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.patient.model.PatientHistory;
 import sae.semestre.six.room.model.Room;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity

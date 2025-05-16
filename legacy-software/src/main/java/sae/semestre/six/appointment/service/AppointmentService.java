@@ -11,8 +11,12 @@
 package sae.semestre.six.appointment.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Optionals;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sae.semestre.six.appointment.dao.AppointmentDao;
+import sae.semestre.six.appointment.dto.AppointmentDto;
+import sae.semestre.six.appointment.dto.AppointmentMapper;
 import sae.semestre.six.appointment.exception.UnvailableException;
 import sae.semestre.six.doctor.dao.DoctorDao;
 import sae.semestre.six.appointment.model.Appointment;
@@ -65,19 +69,26 @@ public class AppointmentService {
      * @return {@link Appointment} objet représentant le rendez-vous créé
      * @throws UnvailableException Si le créneau est déjà réservé ou si l'heure est hors des plages permises
      */
-    public Appointment scheduleAppointment(String doctorNumber, String patientNumber, String roomNumber, Date appointmentDate, int durationMinutes) {
-        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber);
-        if (doctor == null) {
+    @Transactional
+    public AppointmentDto scheduleAppointment(String doctorNumber, String patientNumber, String roomNumber, Date appointmentDate, int durationMinutes) {
+        Doctor doctor;
+        try {
+            doctor = doctorDao.findByDoctorNumber(doctorNumber);
+        } catch (Exception e) {
             throw new IllegalArgumentException("Médecin non trouvé");
         }
 
-        Patient patient = patientDao.findByPatientNumber(patientNumber);
-        if (patient == null) {
+        Patient patient;
+        try {
+            patient = patientDao.findByPatientNumber(patientNumber);
+        } catch (Exception e) {
             throw new IllegalArgumentException("Patient non trouvé");
         }
 
-        Room room = roomDao.findByRoomNumber(roomNumber);
-        if (room == null) {
+        Room room;
+        try {
+            room = roomDao.findByRoomNumber(roomNumber);
+        } catch (Exception e) {
             throw new IllegalArgumentException("Salle non trouvée");
         }
 
@@ -99,7 +110,7 @@ public class AppointmentService {
                 "Vous avez un nouveau rendez-vous prévu pour le " + appointmentDate
         );
 
-        return appointment;
+        return AppointmentMapper.toDto(appointment);
     }
 
     /**
@@ -110,9 +121,11 @@ public class AppointmentService {
      * @return Liste {@link List<Date>} des créneaux horaires disponibles
      */
     public List<TimeSlot> getAvailableSlots(String doctorNumber, Date date) {
-        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber);
-        if (doctor == null) {
-            throw new IllegalArgumentException("Médecin non trouvé");
+        Doctor doctor = null;
+        try {
+            doctor = doctorDao.findByDoctorNumber(doctorNumber);
+        } catch (Exception e) {
+            new IllegalArgumentException("Médecin non trouvé");
         }
 
         Calendar dayStart = Calendar.getInstance();
@@ -179,6 +192,13 @@ public class AppointmentService {
         int startHour = startCal.get(Calendar.HOUR_OF_DAY);
         int endHour = endCal.get(Calendar.HOUR_OF_DAY);
 
+        System.out.println(appointmentDate);
+        System.out.println(startHour);
+        System.out.println(endHour);
+
+        System.out.println(doctor.getWorkStartHour());
+        System.out.println(doctor.getWorkEndHour());
+
         // Vérification horaires de travail
         if (startHour < doctor.getWorkStartHour() || endHour >= doctor.getWorkEndHour()) {
             throw new UnvailableException("Le rendez-vous dépasse les horaires de travail du médecin.");
@@ -240,11 +260,13 @@ public class AppointmentService {
      * @return Liste {@link List<Appointment>} des rendez-vous du médecin
      */
     public List<Appointment> getAppointmentsByDoctorId(String doctorNumber) {
-        // Récupération du médecin à partir de son numéro
-        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber);
-        if (doctor == null) {
-            throw new IllegalArgumentException("Médecin non trouvé");
+        Doctor doctor = null;
+        try {
+            doctor = doctorDao.findByDoctorNumber(doctorNumber);
+        } catch (Exception e) {
+            new IllegalArgumentException("Médecin non trouvé");
         }
+
         return appointmentDao.findByDoctorId(doctor.getId());
     }
 
