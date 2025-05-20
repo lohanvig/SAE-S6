@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import sae.semestre.six.appointment.dto.AppointmentDto;
+import sae.semestre.six.appointment.dto.AppointmentMapper;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.appointment.request.AppointmentRequest;
 import sae.semestre.six.appointment.request.AvailableSlotRequest;
@@ -48,14 +48,14 @@ public class AppointmentController {
     @PostMapping("/appointment")
     public ResponseEntity<?> scheduleAppointment(@RequestBody AppointmentRequest request) {
         try {
-            AppointmentDto result = appointmentService.scheduleAppointment(
+            Appointment result = appointmentService.scheduleAppointment(
                     request.getDoctorNumber(),
                     request.getPatientNumber(),
                     request.getRoomNumber(),
                     request.getAppointmentDate(),
                     request.getDuration()
             );
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(AppointmentMapper.toDto(result));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {

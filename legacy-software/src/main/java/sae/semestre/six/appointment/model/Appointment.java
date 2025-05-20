@@ -41,7 +41,6 @@ public class Appointment {
     @Temporal(TemporalType.TIMESTAMP)
     private Date date;
 
-
     @Column(name = "status")
     private String status;
 
@@ -126,11 +125,17 @@ public class Appointment {
      * chevauche pas d'autres rendez-vous du médecin, ni d'autres rendez-vous déjà
      * planifiés dans la salle.
      *
-     * @param doctorAppointments
+     * @param doctorAppointments rendez-vous du docteur
+     * @param roomAppointments rendez-vous de la salle
      *
      * @throws UnvailableException Si le rendez-vous n'est pas planifiable
      */
     public void validateSlot(List<Appointment> doctorAppointments, List<Appointment> roomAppointments) {
+
+        if (this.doctor == null || this.room == null || this.date == null) {
+            throw new IllegalArgumentException("Impossible de vérifier la validité du créneau.");
+        }
+
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(this.date);
 
