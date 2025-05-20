@@ -22,30 +22,6 @@ public class InventoryService {
 
     private final EmailService emailService = EmailService.getInstance();
 
-    // Suivre les stocks des fournitures médicales
-    public List<Inventory> trackMedicalSupplies() {
-        // Retourne la liste de tous les articles en stock
-        return inventoryDao.findAll();
-    }
-
-    // Gérer les alertes de réapprovisionnement
-    public List<Inventory> manageRestockAlerts() {
-        // Retourne uniquement les articles nécessitant un réapprovisionnement
-        return inventoryDao.findNeedingRestock();
-    }
-
-    // Suivre l'historique de prix (on le simule ici avec une simple mise à jour de la date)
-    public void trackPriceHistory(Long inventoryId, double newUnitPrice) {
-        Inventory inventory = inventoryDao.findById(inventoryId);
-        if (inventory != null) {
-            inventory.setUnitPrice(newUnitPrice);
-            inventory.setLastRestocked(new Date()); // On pourrait aussi gérer une table séparée pour un vrai historique
-            inventoryDao.update(inventory);
-        } else {
-            throw new IllegalArgumentException("Inventory item not found with ID: " + inventoryId);
-        }
-    }
-
 
     public List<Inventory> reorderItems() {
         List<Inventory> lowStockItems = inventoryDao.findNeedingRestock();
