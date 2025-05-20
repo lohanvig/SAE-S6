@@ -10,11 +10,11 @@ import java.util.Optional;
 public class PatientDaoImpl extends AbstractHibernateDao<Patient, Long> implements PatientDao {
     
     @Override
-    public Optional<Patient> findByPatientNumber(String patientNumber) {
-        return Optional.ofNullable((Patient) getEntityManager()
+    public Patient findByPatientNumber(String patientNumber) {
+        return (Patient) getEntityManager()
                 .createQuery("FROM Patient WHERE patientNumber = :patientNumber")
                 .setParameter("patientNumber", patientNumber)
-                .getSingleResult());
+                .getSingleResult();
     }
     
     @Override

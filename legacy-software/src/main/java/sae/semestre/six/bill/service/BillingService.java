@@ -80,6 +80,13 @@ public class BillingService {
     @Transactional
     public String processBill(String patientId, String doctorNumber, String[] treatments) throws IOException {
         // Chargement des entités Patient et Doctor depuis la base de données
+        Patient patient;
+        try {
+            patient = patientDao.findByPatientNumber(patientId);
+        } catch (Exception e) {
+            throw new NoSuchElementException("Patient non trouvé");
+        }
+
         Patient patient = patientDao.findByPatientNumber(patientId)
                                     .orElseThrow(() -> new NoSuchElementException("Patient non trouvé"));
 

@@ -76,7 +76,6 @@ public class Bill {
         this.status = status;
         this.lastModified = new Date(); 
     }
-    
     public Set<BillDetail> getBillDetails() { return billDetails; }
     public void setBillDetails(Set<BillDetail> billDetails) { this.billDetails = billDetails; }
 } 

@@ -98,4 +98,5 @@ public class InventoryController {
             return ResponseEntity.status(500).body("Error updating price: " + e.getMessage());
         }
     }
+
 }

@@ -1,13 +1,16 @@
 package sae.semestre.six.appointment.model;
 
 import jakarta.persistence.*;
+import sae.semestre.six.appointment.exception.UnvailableException;
 import sae.semestre.six.doctor.model.Doctor;
 import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.patient.model.PatientHistory;
 import sae.semestre.six.room.model.Room;
 
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "appointments")
@@ -116,4 +119,65 @@ public class Appointment {
     public int getDuration() { return duration; }
 
     public void setDuration(int appointmentDuration) { this.duration = appointmentDuration; }
+
+    /**
+     * Valide la faisabilité d'un créneau de rendez-vous pour un médecin et une salle,
+     * en vérifiant qu'il ne dépasse pas les horaires de travail du médecin, qu'il ne
+     * chevauche pas d'autres rendez-vous du médecin, ni d'autres rendez-vous déjà
+     * planifiés dans la salle.
+     *
+     * @param doctorAppointments
+     *
+     * @throws UnvailableException Si le rendez-vous n'est pas planifiable
+     */
+    public void validateSlot(List<Appointment> doctorAppointments, List<Appointment> roomAppointments) {
+        Calendar startCal = Calendar.getInstance();
+        startCal.setTime(this.date);
+
+        Calendar endCal = (Calendar) startCal.clone();
+        endCal.add(Calendar.MINUTE, this.duration);
+
+        int startHour = startCal.get(Calendar.HOUR_OF_DAY);
+        int endHour = endCal.get(Calendar.HOUR_OF_DAY);
+
+        // Vérification horaires de travail
+        if (startHour < this.doctor.getWorkStartHour() || endHour >= this.doctor.getWorkEndHour()) {
+            throw new UnvailableException("Le rendez-vous dépasse les horaires de travail du médecin.");
+        }
+
+        Date startTime = startCal.getTime();
+        Date endTime = endCal.getTime();
+
+        // Vérif conflits médecin
+        for (Appointment existing : doctorAppointments) {
+            if (hasConflict(startTime, endTime, existing.getDate(), this.duration)) {
+                throw new UnvailableException("Le médecin a déjà un rendez-vous qui chevauche ce créneau.");
+            }
+        }
+
+        // Vérif conflits salle
+        for (Appointment existing : roomAppointments) {
+            if (hasConflict(startTime, endTime, existing.getDate(), this.duration)) {
+                throw new UnvailableException("La salle est déjà utilisée pendant ce créneau.");
+            }
+        }
+    }
+
+    /**
+     * Vérifie s'il existe un conflit entre deux intervalles de rendez-vous.
+     *
+     * @param newStart               Date de début du nouveau rendez-vous
+     * @param newEnd                 Date de fin du nouveau rendez-vous
+     * @param existingStart          Date de début du rendez-vous existant
+     * @param existingDurationMinutes Durée en minutes du rendez-vous existant
+     * @return true si les deux rendez-vous se chevauchent, false sinon
+     */
+    private boolean hasConflict(Date newStart, Date newEnd, Date existingStart, int existingDurationMinutes) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(existingStart);
+        cal.add(Calendar.MINUTE, existingDurationMinutes);
+        Date existingEnd = cal.getTime();
+
+        return newStart.before(existingEnd) && newEnd.after(existingStart);
+    }
 }

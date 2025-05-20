@@ -6,6 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PatientDao extends GenericDao<Patient, Long> {
-    Optional<Patient> findByPatientNumber(String patientNumber);
+    Patient findByPatientNumber(String patientNumber);
     List<Patient> findByLastName(String lastName);
 } 

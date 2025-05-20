@@ -11,7 +11,6 @@
 package sae.semestre.six.appointment.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Optionals;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sae.semestre.six.appointment.dao.AppointmentDao;
@@ -92,8 +91,6 @@ public class AppointmentService {
             throw new IllegalArgumentException("Salle non trouvée");
         }
 
-        validateAppointmentSlot(doctor, room, appointmentDate, durationMinutes);
-
         Appointment appointment = new Appointment();
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
@@ -101,6 +98,11 @@ public class AppointmentService {
         appointment.setDate(appointmentDate);
         appointment.setStatus("SCHEDULED");
         appointment.setAppointmentNumber(UUID.randomUUID().toString());
+
+        // Vérifie la validité du créneau
+        List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctor.getId());
+        List<Appointment> roomAppointments = appointmentDao.findByRoomIdByDate(room.getId(), appointmentDate);
+        appointment.validateSlot(doctorAppointments, roomAppointments);
 
         appointmentDao.save(appointment);
 
@@ -264,7 +266,7 @@ public class AppointmentService {
         try {
             doctor = doctorDao.findByDoctorNumber(doctorNumber);
         } catch (Exception e) {
-            new IllegalArgumentException("Médecin non trouvé");
+            throw new IllegalArgumentException("Médecin non trouvé");
         }
 
         return appointmentDao.findByDoctorId(doctor.getId());
