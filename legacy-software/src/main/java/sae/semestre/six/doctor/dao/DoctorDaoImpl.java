@@ -4,6 +4,7 @@ import sae.semestre.six.base.dao.AbstractHibernateDao;
 import sae.semestre.six.doctor.model.Doctor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class DoctorDaoImpl extends AbstractHibernateDao<Doctor, Long> implements DoctorDao {

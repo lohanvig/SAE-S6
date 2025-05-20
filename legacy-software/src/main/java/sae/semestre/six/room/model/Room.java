@@ -25,10 +25,7 @@ public class Room {
     
     @Column(name = "capacity")
     private Integer capacity;
-    
-    @Column(name = "is_occupied")
-    private Boolean isOccupied = false;
-    
+
     @OneToMany(mappedBy = "room")
     private Set<Appointment> appointments = new HashSet<>();
     
@@ -77,14 +74,6 @@ public class Room {
         this.capacity = capacity;
     }
     
-    public Boolean getIsOccupied() {
-        return isOccupied;
-    }
-    
-    public void setIsOccupied(Boolean isOccupied) {
-        this.isOccupied = isOccupied;
-    }
-    
     public Set<Appointment> getAppointments() {
         return appointments;
     }
@@ -97,14 +86,8 @@ public class Room {
         return currentPatientCount;
     }
     
-    public void setCurrentPatientCount(Integer currentPatientCount) {
-        this.currentPatientCount = currentPatientCount;
-        
-        this.isOccupied = currentPatientCount >= capacity;
-    }
-    
-    
+    public void setCurrentPatientCount(Integer currentPatientCount) { this.currentPatientCount = currentPatientCount; }
     public boolean canAcceptPatient() {
-        return currentPatientCount < capacity && !isOccupied;
+        return currentPatientCount < capacity;
     }
 } 

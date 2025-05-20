@@ -11,7 +11,7 @@ INSERT INTO patients (patient_number, first_name, last_name, date_of_birth, gend
 ('PT003', 'Emma', 'Petit', '1978-11-30', 'F', '8 rue de la Paix, Marseille', '0687654323');
 
 -- Insertion des rendez-vous
-INSERT INTO appointments (appointment_number, patient_id, doctor_id, appointment_date, status, description, room_number) VALUES
+INSERT INTO appointments (appointment_number, patient_id, doctor_id, appointment_date, status, description) VALUES
 ('RDV001', 1, 1, '2024-02-15 09:00:00', 'CONFIRMÉ', 'Consultation cardiologique', 'A101'),
 ('RDV002', 2, 2, '2024-02-15 10:30:00', 'CONFIRMÉ', 'Suivi pédiatrique', 'B202'),
 ('RDV003', 3, 3, '2024-02-15 14:00:00', 'CONFIRMÉ', 'Consultation neurologique', 'C303');

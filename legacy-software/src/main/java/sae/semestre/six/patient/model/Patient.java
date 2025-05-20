@@ -37,7 +37,7 @@ public class Patient {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "patient")
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     private Set<Appointment> appointments = new HashSet<>();
 
     

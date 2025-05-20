@@ -6,6 +6,7 @@ import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.patient.model.PatientHistory;
 import sae.semestre.six.room.model.Room;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -35,7 +36,7 @@ public class Appointment {
 
     @Column(name = "appointment_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-    private Date appointmentDate;
+    private Date date;
 
 
     @Column(name = "status")
@@ -44,8 +45,8 @@ public class Appointment {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "room_number")
-    private String roomNumber;
+    @Column(name="appointmentDuration")
+    private int duration;
 
     
     public Appointment() {
@@ -84,12 +85,12 @@ public class Appointment {
         this.doctor = doctor;
     }
 
-    public Date getAppointmentDate() {
-        return appointmentDate;
+    public Date getDate() {
+        return date;
     }
 
-    public void setAppointmentDate(Date appointmentDate) {
-        this.appointmentDate = appointmentDate;
+    public void setDate(Date appointmentDate) {
+        this.date = appointmentDate;
     }
 
     public String getStatus() {
@@ -108,11 +109,11 @@ public class Appointment {
         this.description = description;
     }
 
-    public String getRoomNumber() {
-        return roomNumber;
-    }
+    public Room getRoom() { return room; }
 
-    public void setRoomNumber(String roomNumber) {
-        this.roomNumber = roomNumber;
-    }
-} 
+    public void setRoom(Room room) { this.room = room; }
+
+    public int getDuration() { return duration; }
+
+    public void setDuration(int appointmentDuration) { this.duration = appointmentDuration; }
+}
