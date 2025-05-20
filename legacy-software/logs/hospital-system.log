@@ -5929,3 +5929,44 @@ Correct the classpath of your application so that it contains compatible version
 2025-04-01T18:05:45.344+02:00  INFO 21968 --- [legacy-hospital-system] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-04-01T18:05:45.346+02:00  INFO 21968 --- [legacy-hospital-system] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2025-04-01T18:05:45.352+02:00  INFO 21968 --- [legacy-hospital-system] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-20T14:19:54.152+02:00  INFO 19152 --- [legacy-hospital-system] [main] sae.semestre.six.DemoApplication         : Starting DemoApplication using Java 21 with PID 19152 (C:\Users\vigna\OneDrive\Bureau\SAE-S6\legacy-software\target\classes started by vigna in C:\Users\vigna\OneDrive\Bureau\SAE-S6\legacy-software)
+2025-05-20T14:19:54.155+02:00 DEBUG 19152 --- [legacy-hospital-system] [main] sae.semestre.six.DemoApplication         : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-05-20T14:19:54.156+02:00  INFO 19152 --- [legacy-hospital-system] [main] sae.semestre.six.DemoApplication         : No active profile set, falling back to 1 default profile: "default"
+2025-05-20T14:19:55.726+02:00  INFO 19152 --- [legacy-hospital-system] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-20T14:19:55.808+02:00  INFO 19152 --- [legacy-hospital-system] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 65 ms. Found 0 JPA repository interfaces.
+2025-05-20T14:19:56.745+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8045 (http)
+2025-05-20T14:19:56.774+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-20T14:19:56.776+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-20T14:19:56.924+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-20T14:19:56.925+02:00  INFO 19152 --- [legacy-hospital-system] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2675 ms
+2025-05-20T14:19:57.111+02:00  INFO 19152 --- [legacy-hospital-system] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-20T14:19:57.457+02:00  INFO 19152 --- [legacy-hospital-system] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@445bce9a
+2025-05-20T14:19:57.461+02:00  INFO 19152 --- [legacy-hospital-system] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-20T14:19:57.674+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-20T14:19:57.826+02:00  INFO 19152 --- [legacy-hospital-system] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-20T14:19:57.906+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-20T14:19:58.486+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-20T14:19:58.633+02:00  WARN 19152 --- [legacy-hospital-system] [main] org.hibernate.dialect.Dialect            : HHH000511: The 5.7.44 version for [org.hibernate.dialect.MariaDBDialect] is no longer supported, hence certain features may not work properly. The minimum supported version is 10.4.0. Check the community dialects project for available legacy versions.
+2025-05-20T14:19:58.641+02:00  WARN 19152 --- [legacy-hospital-system] [main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-20T14:19:58.670+02:00  INFO 19152 --- [legacy-hospital-system] [main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 5.7.44
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-20T14:20:01.021+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-20T14:20:01.593+02:00  INFO 19152 --- [legacy-hospital-system] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-20T14:20:02.249+02:00  WARN 19152 --- [legacy-hospital-system] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-20T14:20:02.337+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.s.v.b.OptionalValidatorFactoryBean     : Failed to set up a Bean Validation provider: jakarta.validation.NoProviderFoundException: Unable to create a Configuration, because no Jakarta Bean Validation provider could be found. Add a provider like Hibernate Validator (RI) to your classpath.
+2025-05-20T14:20:03.114+02:00  INFO 19152 --- [legacy-hospital-system] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8045 (http) with context path '/'
+2025-05-20T14:20:03.132+02:00  INFO 19152 --- [legacy-hospital-system] [main] sae.semestre.six.DemoApplication         : Started DemoApplication in 9.888 seconds (process running for 11.25)
+2025-05-20T14:22:10.179+02:00  INFO 19152 --- [legacy-hospital-system] [http-nio-8045-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-20T14:22:10.180+02:00  INFO 19152 --- [legacy-hospital-system] [http-nio-8045-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-20T14:22:10.182+02:00  INFO 19152 --- [legacy-hospital-system] [http-nio-8045-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-05-20T14:28:28.026+02:00  INFO 19152 --- [legacy-hospital-system] [SpringApplicationShutdownHook] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+2025-05-20T14:28:28.042+02:00  INFO 19152 --- [legacy-hospital-system] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+2025-05-20T14:28:28.052+02:00  INFO 19152 --- [legacy-hospital-system] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-20T14:28:28.055+02:00  INFO 19152 --- [legacy-hospital-system] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-20T14:28:28.071+02:00  INFO 19152 --- [legacy-hospital-system] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

@@ -1,4 +1,4 @@
-package sae.semestre.six.inventory.model;
+package sae.semestre.six.price_history.model;
 
 import jakarta.persistence.*;
 import sae.semestre.six.inventory.model.Inventory;
@@ -34,4 +34,8 @@ public class PriceHistory {
     public Double getPercentageChange() {
         return (newPrice - oldPrice) / oldPrice * 100;
     }
-} 
+
+    public Object getInventoryId() {
+        return inventory.getId();
+    }
+}

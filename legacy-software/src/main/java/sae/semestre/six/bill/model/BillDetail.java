@@ -55,4 +55,5 @@ public class BillDetail {
     
     public Double getLineTotal() { return lineTotal; }
     public void setLineTotal(Double lineTotal) { this.lineTotal = lineTotal; }
+
 } 

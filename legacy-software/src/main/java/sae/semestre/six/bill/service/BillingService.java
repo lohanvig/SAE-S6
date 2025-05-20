@@ -13,6 +13,7 @@ import sae.semestre.six.patient.dao.PatientDao;
 import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.service.EmailService;
 import sae.semestre.six.utils.FileInitializer;
+import sae.semestre.six.bill.model.Bill;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -87,40 +88,23 @@ public class BillingService {
             throw new NoSuchElementException("Patient non trouvé");
         }
 
-        Patient patient = patientDao.findByPatientNumber(patientId)
-                                    .orElseThrow(() -> new NoSuchElementException("Patient non trouvé"));
-
-        Doctor doctor = doctorDao.findByDoctorNumber(doctorNumber)
-                                 .orElseThrow(() -> new NoSuchElementException("Médecin non trouvé"));
+        Doctor doctor;
+        try {
+            doctor = doctorDao.findByDoctorNumber(doctorNumber);
+        } catch (Exception e) {
+            throw new NoSuchElementException("Médecin non trouvé");
+        }
 
         // Création de la facture
-        Bill bill = new Bill();
-        bill.setBillNumber("BILL" + System.currentTimeMillis());
-        bill.setPatient(patient);
-        bill.setDoctor(doctor);
-
-        double total = 0.0;
-        Set<BillDetail> details = new HashSet<>();
+        Bill bill = Bill.createBill(patient, doctor);
 
         // Création des lignes de facture
         for (String treatment : treatments) {
             double price = priceList.getOrDefault(treatment, 0.0);
-            total += price;
-
-            BillDetail detail = new BillDetail();
-            detail.setBill(bill);
-            detail.setTreatmentName(treatment);
-            detail.setUnitPrice(price);
-            details.add(detail);
+            bill.addBillDetails(treatment, price, DISCOUNT_AMOUNT, DISCOUNT_RATE);
         }
 
-        // Application d'une remise si le total dépasse un montant max
-        if (total > DISCOUNT_AMOUNT) {
-            total *= DISCOUNT_RATE;
-        }
-
-        bill.setTotalAmount(total);
-        bill.setBillDetails(details);
+        double total = bill.getTotalAmount();
 
         // Écriture dans un fichier texte de sauvegarde
         File billFile = new File(FileInitializer.BILL_FOLDER + bill.getBillNumber() + ".txt");

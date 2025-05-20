@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import sae.semestre.six.inventory.dao.InventoryDao;
 import sae.semestre.six.inventory.model.Inventory;
+import sae.semestre.six.invoice.model.SupplierInvoice;
+import sae.semestre.six.invoice.model.SupplierInvoiceDetail;
 import sae.semestre.six.service.EmailService;
 
 import java.io.FileWriter;
@@ -65,6 +67,27 @@ public class InventoryService {
         }
 
         inventoryDao.updatePrice(itemCode, newPrice);
+    }
+
+    public void updateInventory(SupplierInvoice invoice) {
+        if (invoice == null || invoice.getDetails() == null || invoice.getDetails().isEmpty()) {
+            throw new IllegalArgumentException("Invalid invoice data.");
+        }
+        for (SupplierInvoiceDetail detail : invoice.getDetails()) {
+            Inventory inventory = detail.getInventory();
+
+            inventory.setQuantity(inventory.getQuantity() + detail.getQuantity());
+            inventory.setUnitPrice(detail.getUnitPrice());
+            inventory.setLastRestocked(new Date());
+
+            inventoryDao.update(inventory);
+        }
+    }
+
+    public List<Inventory> getLowStockItems() {
+        return inventoryDao.findAll().stream()
+                .filter(Inventory::needsRestock)
+                .collect(Collectors.toList());
     }
 
 }

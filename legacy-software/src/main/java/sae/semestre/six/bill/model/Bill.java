@@ -78,4 +78,47 @@ public class Bill {
     }
     public Set<BillDetail> getBillDetails() { return billDetails; }
     public void setBillDetails(Set<BillDetail> billDetails) { this.billDetails = billDetails; }
-} 
+
+    /**
+     * Creates a new bill for the given patient and doctor.
+     * @param patient the patient for whom the bill is being created
+     * @param doctor the doctor associated with the bill
+     * @return a new instance with the provided patient and doctor
+     */
+    public static Bill createBill(Patient patient, Doctor doctor) {
+        Bill bill = new Bill();
+        bill.setBillNumber("BILL" + System.currentTimeMillis());
+        bill.setPatient(patient);
+        bill.setDoctor(doctor);
+
+        return bill;
+    }
+
+    /**
+     * Applies a discount to the bill if the total amount exceeds a certain threshold.
+     * @param discountAmount the threshold amount for applying the discount
+     * @param discountRate the rate at which to apply the discount
+     */
+    private void applyDiscount(float discountAmount, float discountRate) {
+        if (this.getTotalAmount() > discountAmount) {
+            this.setTotalAmount(this.getTotalAmount() * discountRate);
+        }
+    }
+
+    /**
+     * Factory method to create a BillDetail instance.
+     * @param treatment The treatment name.
+     * @param price The unit price of the treatment.
+     * @return A new BillDetail instance.
+     */
+    public void addBillDetails(String treatment, double price, float discountAmount, float discountRate) {
+        BillDetail detail = new BillDetail();
+        detail.setBill(this);
+        detail.setTreatmentName(treatment);
+        detail.setUnitPrice(price);
+        this.billDetails.add(detail);
+
+        this.setTotalAmount(this.getTotalAmount() + detail.getUnitPrice());
+        this.applyDiscount(discountAmount, discountRate);
+    }
+}

@@ -7,7 +7,7 @@ import sae.semestre.six.room.dto.RoomDto;
 
 public class AppointmentMapper {
     public static AppointmentDto toDto(Appointment appointment) {
-        if (appointment == null) return null;
+        if (appointment == null) { return null; }
 
         AppointmentDto dto = new AppointmentDto();
         dto.setId(appointment.getId());

@@ -49,15 +49,7 @@ public class InventoryController {
     @PostMapping("/supplier-invoice")
     public ResponseEntity<?> processSupplierInvoice(@RequestBody SupplierInvoice invoice) {
         try {
-            for (SupplierInvoiceDetail detail : invoice.getDetails()) {
-                Inventory inventory = detail.getInventory();
-
-                inventory.setQuantity(inventory.getQuantity() + detail.getQuantity());
-                inventory.setUnitPrice(detail.getUnitPrice());
-                inventory.setLastRestocked(new Date());
-
-                inventoryDao.update(inventory);
-            }
+            inventoryService.updateInventory(invoice);
             return ResponseEntity.ok("Supplier invoice processed successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error processing supplier invoice: " + e.getMessage());
@@ -67,11 +59,7 @@ public class InventoryController {
     @GetMapping("/low-stock")
     public ResponseEntity<?> getLowStockItemsID() {
         try {
-            List<Inventory> lowStockItems = inventoryDao.findAll().stream()
-                    .filter(Inventory::needsRestock)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(lowStockItems);
+            return ResponseEntity.ok(inventoryService.getLowStockItems());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error retrieving low stock items: " + e.getMessage());
         }
