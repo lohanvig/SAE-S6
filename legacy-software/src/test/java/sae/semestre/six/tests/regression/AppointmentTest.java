@@ -8,6 +8,7 @@ import sae.semestre.six.doctor.model.Doctor;
 import sae.semestre.six.room.model.Room;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +24,8 @@ class AppointmentTest {
     @BeforeEach
     void setUp() {
         doctor = new Doctor();
-        doctor.setWorkStartHour(9);
-        doctor.setWorkEndHour(17); // de 9h à 17h
+        doctor.setWorkStartHour(LocalTime.of(9, 0));
+        doctor.setWorkEndHour(LocalTime.of(17, 0)); // de 9h à 17h
         room = new Room();
         appointment = new Appointment();
         appointment.setDoctor(doctor);

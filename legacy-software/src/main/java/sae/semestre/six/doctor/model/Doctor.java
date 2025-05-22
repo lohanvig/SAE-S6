@@ -1,8 +1,10 @@
 package sae.semestre.six.doctor.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import sae.semestre.six.appointment.model.Appointment;
 
+import java.time.LocalTime;
 import java.util.Set;
 
 @Entity
@@ -34,43 +36,20 @@ public class Doctor {
     @Column(name = "department")
     private String department;
 
-    @Column(name = "startHour")
-    private int workStartHour;
+    @JsonFormat(pattern = "HH:mm")
+    @Column(name = "start_hour")
+    private LocalTime workStartHour;
 
-    @Column(name = "endHour")
-    private int workEndHour;
+    @JsonFormat(pattern = "HH:mm")
+    @Column(name = "end_hour")
+    private LocalTime workEndHour;
 
     @OneToMany(mappedBy = "doctor", fetch = FetchType.LAZY)
     private Set<Appointment> appointments;
 
-    
     public Doctor() {
-        this.workStartHour = 9;
-        this.workEndHour = 17;
-    }
-
-    public int getWorkStartHour() {
-        return workStartHour;
-    }
-
-    public void setWorkStartHour(int workStartHour) {
-        if (workStartHour > workEndHour || workStartHour < 0 || workStartHour > 23) {
-            throw new IllegalArgumentException("La date de début de travail d'un docteur doit être comprise entre 0 " +
-                    "et 23 heure et doit être inférieure à celle de fin.");
-        }
-        this.workStartHour = workStartHour;
-    }
-
-    public int getWorkEndHour() {
-        return workEndHour;
-    }
-
-    public void setWorkEndHour(int workEndHour) {
-        if (workEndHour < workStartHour || workEndHour < 0 || workEndHour > 23) {
-            throw new IllegalArgumentException("La date de fin de travail d'un docteur doit être comprise entre 0 " +
-                    "et 23 heure et doit être supérieure à celle de début.");
-        }
-        this.workEndHour = workEndHour;
+        this.workStartHour = LocalTime.of(9, 0);
+        this.workEndHour = LocalTime.of(17, 0);
     }
 
     public Long getId() {
@@ -137,6 +116,28 @@ public class Doctor {
         this.department = department;
     }
 
+    public LocalTime getWorkStartHour() {
+        return workStartHour;
+    }
+
+    public void setWorkStartHour(LocalTime workStartHour) {
+        if (this.workEndHour != null && workStartHour.isAfter(this.workEndHour)) {
+            throw new IllegalArgumentException("L'heure de début doit précéder l'heure de fin.");
+        }
+        this.workStartHour = workStartHour;
+    }
+
+    public LocalTime getWorkEndHour() {
+        return workEndHour;
+    }
+
+    public void setWorkEndHour(LocalTime workEndHour) {
+        if (this.workStartHour != null && workEndHour.isBefore(this.workStartHour)) {
+            throw new IllegalArgumentException("L'heure de fin doit suivre l'heure de début.");
+        }
+        this.workEndHour = workEndHour;
+    }
+
     public Set<Appointment> getAppointments() {
         return appointments;
     }
@@ -144,4 +145,4 @@ public class Doctor {
     public void setAppointments(Set<Appointment> appointments) {
         this.appointments = appointments;
     }
-} 
+}

@@ -48,11 +48,9 @@ public class TimeSlot {
     public static List<TimeSlot> getDoctorAvailableTimeSlotByDay(LocalDateTime date, Doctor doctor, List<Appointment> doctorAppointments) {
         List<TimeSlot> availableSlots = new ArrayList<>();
 
-        // On extrait uniquement la date pour construire le jour de travail
-        LocalDateTime dayStart = date.toLocalDate().atTime(doctor.getWorkStartHour(), 0);
-        LocalDateTime dayEnd = date.toLocalDate().atTime(doctor.getWorkEndHour(), 0);
+        LocalDateTime dayStart = date.toLocalDate().atTime(doctor.getWorkStartHour());
+        LocalDateTime dayEnd = date.toLocalDate().atTime(doctor.getWorkEndHour());
 
-        // On trie les rendez-vous existants
         doctorAppointments.sort(Comparator.comparing(Appointment::getDate));
 
         LocalDateTime slotStart = dayStart;
@@ -61,24 +59,22 @@ public class TimeSlot {
             LocalDateTime appStart = appointment.getDate();
             LocalDateTime appEnd = appStart.plusMinutes(appointment.getDuration());
 
-            // Si un créneau est libre avant le rendez-vous
             if (slotStart.isBefore(appStart)) {
                 availableSlots.add(new TimeSlot(slotStart, appStart));
             }
 
-            // On avance le curseur de début pour le prochain créneau
             if (slotStart.isBefore(appEnd)) {
                 slotStart = appEnd;
             }
         }
 
-        // Ajouter le dernier créneau jusqu'à la fin de journée
         if (slotStart.isBefore(dayEnd)) {
             availableSlots.add(new TimeSlot(slotStart, dayEnd));
         }
 
         return availableSlots;
     }
+
 
 }
 

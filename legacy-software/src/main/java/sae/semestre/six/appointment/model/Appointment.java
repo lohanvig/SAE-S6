@@ -9,6 +9,7 @@ import sae.semestre.six.room.model.Room;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -132,7 +133,6 @@ public class Appointment {
      * @throws UnvailableException Si le rendez-vous n'est pas planifiable
      */
     public void validateSlot(List<Appointment> doctorAppointments, List<Appointment> roomAppointments) {
-
         if (this.doctor == null || this.room == null || this.date == null) {
             throw new IllegalArgumentException("Impossible de vérifier la validité du créneau.");
         }
@@ -140,28 +140,32 @@ public class Appointment {
         LocalDateTime startDateTime = this.date;
         LocalDateTime endDateTime = startDateTime.plusMinutes(this.duration);
 
-        int startHour = startDateTime.getHour();
-        int endHour = endDateTime.getHour();
+        LocalTime appointmentStartTime = startDateTime.toLocalTime();
+        LocalTime appointmentEndTime = endDateTime.toLocalTime();
 
-        // Vérification des horaires de travail du médecin
-        if (startHour < this.doctor.getWorkStartHour() || endHour >= this.doctor.getWorkEndHour()) {
+        LocalTime doctorStart = doctor.getWorkStartHour();
+        LocalTime doctorEnd = doctor.getWorkEndHour();
+
+        // Vérifie si le créneau respecte les horaires de travail
+        if (appointmentStartTime.isBefore(doctorStart) || appointmentEndTime.isAfter(doctorEnd)) {
             throw new UnvailableException("Le rendez-vous dépasse les horaires de travail du médecin.");
         }
 
-        // Vérification des conflits avec les rendez-vous du médecin
+        // Vérifie les conflits avec les autres rendez-vous du médecin
         for (Appointment existing : doctorAppointments) {
             if (hasConflict(startDateTime, endDateTime, existing.getDate(), existing.getDuration())) {
                 throw new UnvailableException("Le médecin a déjà un rendez-vous qui chevauche ce créneau.");
             }
         }
 
-        // Vérification des conflits avec les rendez-vous de la salle
+        // Vérifie les conflits avec les autres rendez-vous de la salle
         for (Appointment existing : roomAppointments) {
             if (hasConflict(startDateTime, endDateTime, existing.getDate(), existing.getDuration())) {
                 throw new UnvailableException("La salle est déjà utilisée pendant ce créneau.");
             }
         }
     }
+
 
     /**
      * Vérifie s'il existe un conflit entre deux intervalles de rendez-vous.
