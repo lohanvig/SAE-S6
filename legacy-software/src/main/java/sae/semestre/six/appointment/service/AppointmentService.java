@@ -73,21 +73,21 @@ public class AppointmentService {
         try {
             doctor = doctorDao.findByDoctorNumber(data.getDoctorNumber());
         } catch (Exception e) {
-            throw new IllegalArgumentException("Médecin non trouvé");
+            throw new NoSuchElementException("Médecin non trouvé");
         }
 
         Patient patient;
         try {
             patient = patientDao.findByPatientNumber(data.getPatientNumber());
         } catch (Exception e) {
-            throw new IllegalArgumentException("Patient non trouvé");
+            throw new NoSuchElementException("Patient non trouvé");
         }
 
         Room room;
         try {
             room = roomDao.findByRoomNumber(data.getRoomNumber());
         } catch (Exception e) {
-            throw new IllegalArgumentException("Salle non trouvée");
+            throw new NoSuchElementException("Salle non trouvée");
         }
 
         Appointment appointment = new Appointment();
@@ -127,7 +127,7 @@ public class AppointmentService {
         try {
             doctor = doctorDao.findByDoctorNumber(doctorNumber);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Médecin non trouvé");
+            throw new NoSuchElementException("Médecin non trouvé");
         }
         List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctor.getId());
         return TimeSlot.getDoctorAvailableTimeSlotByDay(date, doctor, doctorAppointments);
@@ -155,7 +155,7 @@ public class AppointmentService {
         try {
             doctor = doctorDao.findByDoctorNumber(doctorNumber);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Médecin non trouvé");
+            throw new NoSuchElementException("Médecin non trouvé");
         }
 
         return appointmentDao.findByDoctorId(doctor.getId());
@@ -169,9 +169,11 @@ public class AppointmentService {
      */
     public List<Appointment> getAppointmentsByPatientId(String patientNumber) {
         // Récupération du patient à partir de son numéro
-        Patient patient = patientDao.findByPatientNumber(patientNumber);
-        if (patient == null) {
-            throw new IllegalArgumentException("Patient non trouvé");
+        Patient patient;
+        try {
+            patient = patientDao.findByPatientNumber(patientNumber);
+        } catch (Exception e) {
+            throw new NoSuchElementException("Patient non trouvé");
         }
 
         return appointmentDao.findByPatientId(patient.getId());

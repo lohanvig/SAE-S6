@@ -5,6 +5,9 @@ import sae.semestre.six.doctor.dto.DoctorShortDto;
 import sae.semestre.six.patient.dto.PatientShortDto;
 import sae.semestre.six.room.dto.RoomDto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AppointmentMapper {
     public static AppointmentDto toDto(Appointment appointment) {
         if (appointment == null) { return null; }
@@ -39,5 +42,14 @@ public class AppointmentMapper {
         dto.setRoom(roomDto);
 
         return dto;
+    }
+
+    public static List<AppointmentDto> ListToDto(List<Appointment> appointments) {
+        ArrayList<AppointmentDto> dtoList = new ArrayList<>();
+        for (Appointment appointment:
+             appointments) {
+            dtoList.add(toDto(appointment));
+        }
+        return dtoList.stream().toList();
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import sae.semestre.six.appointment.dto.AppointmentDto;
 import sae.semestre.six.appointment.dto.AppointmentMapper;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.appointment.request.AppointmentRequest;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/scheduling")
@@ -51,7 +53,7 @@ public class AppointmentController {
         try {
             Appointment result = appointmentService.scheduleAppointment(request);
             return ResponseEntity.ok(AppointmentMapper.toDto(result));
-        } catch (IllegalArgumentException e) {
+        } catch (NoSuchElementException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
@@ -64,10 +66,14 @@ public class AppointmentController {
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Date}
      *         représentant les heures disponibles
      */
-    @GetMapping("/available-slots")
-    public ResponseEntity<List<TimeSlot>> getAvailableSlots(
+    @GetMapping("/doctor/available-slots")
+    public ResponseEntity<?> getAvailableSlotsForDoctor(
             @RequestBody AvailableSlotRequest request) {
-        return ResponseEntity.ok(appointmentService.getAvailableSlots(request.getDoctorId(), request.getDate()));
+        try {
+            return ResponseEntity.ok(appointmentService.getAvailableSlots(request.getDoctorId(), request.getDate()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**
@@ -77,8 +83,14 @@ public class AppointmentController {
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Appointment}
      */
     @GetMapping("/appointments/patient/{patientNumber}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByPatientId(@PathVariable String patientNumber) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByPatientId(patientNumber));
+    public ResponseEntity<?> getAppointmentsByPatientId(@PathVariable String patientNumber) {
+        try {
+            return ResponseEntity.ok(AppointmentMapper.ListToDto(appointmentService.getAppointmentsByPatientId(patientNumber)));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**
@@ -87,9 +99,15 @@ public class AppointmentController {
      * @param doctorNumber {@link String} identifiant unique du médecin
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Appointment}
      */
-    @GetMapping("/appointments/doctor/{doctorId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByDoctorId(@PathVariable String doctorNumber) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByDoctorId(doctorNumber));
+    @GetMapping("/appointments/doctor/{doctorNumber}")
+    public ResponseEntity<?> getAppointmentsByDoctorId(@PathVariable String doctorNumber) {
+        try {
+            return ResponseEntity.ok(AppointmentMapper.ListToDto(appointmentService.getAppointmentsByDoctorId(doctorNumber)));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
 
     /**
@@ -100,9 +118,14 @@ public class AppointmentController {
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Appointment}
      */
     @GetMapping("/appointments/range")
-    public ResponseEntity<List<Appointment>> getAppointmentsByDateRange(
+    public ResponseEntity<?> getAppointmentsByDateRange(
             @RequestParam LocalDateTime startDate,
             @RequestParam LocalDateTime endDate) {
-        return ResponseEntity.ok(appointmentService.getAppointmentsByDateRange(startDate, endDate));
+
+        try {
+            return ResponseEntity.ok(appointmentService.getAppointmentsByDateRange(startDate, endDate));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        }
     }
 }
