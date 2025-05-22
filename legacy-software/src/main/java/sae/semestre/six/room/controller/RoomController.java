@@ -8,6 +8,7 @@ import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.room.model.Room;
 import sae.semestre.six.room.service.RoomService;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -32,7 +33,7 @@ public class RoomController {
      */
     @GetMapping("/available")
     public List<Map<String, Object>> getAvailableRooms(@RequestParam String roomNumber,
-                                                       @RequestParam Date appointmentDate,
+                                                       @RequestParam LocalDateTime appointmentDate,
                                                        @RequestParam int durationMinutes) {
         List<Map<String, Object>> availableRooms = new ArrayList<>();
         List<Room> rooms = roomDao.findAll();

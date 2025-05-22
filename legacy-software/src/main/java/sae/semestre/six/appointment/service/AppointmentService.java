@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sae.semestre.six.appointment.dao.AppointmentDao;
 import sae.semestre.six.appointment.exception.UnvailableException;
+import sae.semestre.six.appointment.request.AppointmentRequest;
 import sae.semestre.six.doctor.dao.DoctorDao;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.doctor.model.Doctor;
@@ -24,6 +25,8 @@ import sae.semestre.six.room.dao.RoomDaoImpl;
 import sae.semestre.six.room.model.Room;
 import sae.semestre.six.service.EmailService;
 import sae.semestre.six.timeslot.TimeSlot;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -59,31 +62,30 @@ public class AppointmentService {
     /**
      * Planifie un rendez-vous pour un médecin et un patient à une date donnée.
      *
-     * @param doctorNumber         numéro du médecin
-     * @param patientNumber        numéro du patient
-     * @param appointmentDate      Date du rendez-vous
+     * @param data les données de la requête
      * @return {@link Appointment} objet représentant le rendez-vous créé
      * @throws UnvailableException Si le créneau est déjà réservé ou si l'heure est hors des plages permises
      */
     @Transactional
-    public Appointment scheduleAppointment(String doctorNumber, String patientNumber, String roomNumber, Date appointmentDate, int durationMinutes) {
+    public Appointment scheduleAppointment(AppointmentRequest data) {
+
         Doctor doctor;
         try {
-            doctor = doctorDao.findByDoctorNumber(doctorNumber);
+            doctor = doctorDao.findByDoctorNumber(data.getDoctorNumber());
         } catch (Exception e) {
             throw new IllegalArgumentException("Médecin non trouvé");
         }
 
         Patient patient;
         try {
-            patient = patientDao.findByPatientNumber(patientNumber);
+            patient = patientDao.findByPatientNumber(data.getPatientNumber());
         } catch (Exception e) {
             throw new IllegalArgumentException("Patient non trouvé");
         }
 
         Room room;
         try {
-            room = roomDao.findByRoomNumber(roomNumber);
+            room = roomDao.findByRoomNumber(data.getRoomNumber());
         } catch (Exception e) {
             throw new IllegalArgumentException("Salle non trouvée");
         }
@@ -92,13 +94,14 @@ public class AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
         appointment.setRoom(room);
-        appointment.setDate(appointmentDate);
+        appointment.setDuration(data.getDuration());
+        appointment.setDate(data.getAppointmentDate());
         appointment.setStatus("SCHEDULED");
         appointment.setAppointmentNumber(UUID.randomUUID().toString());
 
         // Vérifie la validité du créneau
         List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctor.getId());
-        List<Appointment> roomAppointments = appointmentDao.findByRoomIdByDate(room.getId(), appointmentDate);
+        List<Appointment> roomAppointments = appointmentDao.findByRoomIdByDate(room.getId(), data.getAppointmentDate());
         appointment.validateSlot(doctorAppointments, roomAppointments);
 
         appointmentDao.save(appointment);
@@ -106,7 +109,7 @@ public class AppointmentService {
         emailService.sendEmail(
                 doctor.getEmail(),
                 "Nouveau rendez-vous planifié",
-                "Vous avez un nouveau rendez-vous prévu pour le " + appointmentDate
+                "Vous avez un nouveau rendez-vous prévu pour le " + data.getAppointmentDate()
         );
 
         return appointment;
@@ -119,7 +122,7 @@ public class AppointmentService {
      * @param date     Date cible pour les créneaux disponibles
      * @return la liste des créneaux horaires disponibles
      */
-    public List<TimeSlot> getAvailableSlots(String doctorNumber, Date date) {
+    public List<TimeSlot> getAvailableSlots(String doctorNumber, LocalDateTime date) {
         Doctor doctor;
         try {
             doctor = doctorDao.findByDoctorNumber(doctorNumber);
@@ -137,7 +140,7 @@ public class AppointmentService {
      * @param endDate   Date de fin de la plage
      * @return Liste {@link List<Appointment>} des rendez-vous dans la plage de dates
      */
-    public List<Appointment> getAppointmentsByDateRange(Date startDate, Date endDate) {
+    public List<Appointment> getAppointmentsByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return appointmentDao.findByDateRange(startDate, endDate);
     }
 

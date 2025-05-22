@@ -3,33 +3,32 @@ package sae.semestre.six.timeslot;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.doctor.model.Doctor;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class TimeSlot {
-    private Date start;
-    private Date end;
+    private LocalDateTime start;
+    private LocalDateTime end;
 
-    public TimeSlot(Date start, Date end) {
+    public TimeSlot(LocalDateTime start, LocalDateTime end) {
         this.start = start;
         this.end = end;
     }
 
-    public void setStart(Date start) {
+    public void setStart(LocalDateTime start) {
         this.start = start;
     }
 
-    public void setEnd(Date end) {
+    public void setEnd(LocalDateTime end) {
         this.end = end;
     }
 
-    public Date getStart() {
+    public LocalDateTime getStart() {
         return start;
     }
 
-    public Date getEnd() {
+    public LocalDateTime getEnd() {
         return end;
     }
 
@@ -42,50 +41,44 @@ public class TimeSlot {
      * Retourne les créneaux horaires disponibles pour un médecin à une date donnée.
      *
      * @param doctor numero du médecin
-     * @param doctorAppointment les créneaux du médecin
-     * @param date     Date cible pour les créneaux disponibles
+     * @param doctorAppointments les créneaux du médecin
+     * @param date cible pour les créneaux disponibles
      * @return Liste des créneaux horaires disponibles
      */
-    public static List<TimeSlot> getDoctorAvailableTimeSlotByDay(Date date, Doctor doctor, List<Appointment> doctorAppointment) {
+    public static List<TimeSlot> getDoctorAvailableTimeSlotByDay(LocalDateTime date, Doctor doctor, List<Appointment> doctorAppointments) {
         List<TimeSlot> availableSlots = new ArrayList<>();
 
-        Calendar dayStart = Calendar.getInstance();
-        dayStart.setTime(date);
-        dayStart.set(Calendar.HOUR_OF_DAY, doctor.getWorkStartHour());
-        dayStart.set(Calendar.MINUTE, 0);
-        dayStart.set(Calendar.SECOND, 0);
-        dayStart.set(Calendar.MILLISECOND, 0);
+        // On extrait uniquement la date pour construire le jour de travail
+        LocalDateTime dayStart = date.toLocalDate().atTime(doctor.getWorkStartHour(), 0);
+        LocalDateTime dayEnd = date.toLocalDate().atTime(doctor.getWorkEndHour(), 0);
 
-        Calendar dayEnd = (Calendar) dayStart.clone();
-        dayEnd.set(Calendar.HOUR_OF_DAY, doctor.getWorkEndHour());
+        // On trie les rendez-vous existants
+        doctorAppointments.sort(Comparator.comparing(Appointment::getDate));
 
-        Calendar slotStart = (Calendar) dayStart.clone();
+        LocalDateTime slotStart = dayStart;
 
-        for (Appointment appointment : doctorAppointment) {
-            Date appStart = appointment.getDate();
-            Calendar appStartCal = Calendar.getInstance();
-            appStartCal.setTime(appStart);
+        for (Appointment appointment : doctorAppointments) {
+            LocalDateTime appStart = appointment.getDate();
+            LocalDateTime appEnd = appStart.plusMinutes(appointment.getDuration());
 
-            Calendar appEndCal = (Calendar) appStartCal.clone();
-            appEndCal.add(Calendar.MINUTE, appointment.getDuration());
-
-            // Si trou entre slotStart et appStartCal
-            if (slotStart.before(appStartCal)) {
-                availableSlots.add(new TimeSlot(slotStart.getTime(), appStartCal.getTime()));
+            // Si un créneau est libre avant le rendez-vous
+            if (slotStart.isBefore(appStart)) {
+                availableSlots.add(new TimeSlot(slotStart, appStart));
             }
 
-            // Mettre à jour slotStart pour le prochain tour
-            if (slotStart.before(appEndCal)) {
-                slotStart = (Calendar) appEndCal.clone();
+            // On avance le curseur de début pour le prochain créneau
+            if (slotStart.isBefore(appEnd)) {
+                slotStart = appEnd;
             }
         }
 
-        // Dernier créneau entre fin dernier rendez-vous et fin journée
-        if (slotStart.before(dayEnd)) {
-            availableSlots.add(new TimeSlot(slotStart.getTime(), dayEnd.getTime()));
+        // Ajouter le dernier créneau jusqu'à la fin de journée
+        if (slotStart.isBefore(dayEnd)) {
+            availableSlots.add(new TimeSlot(slotStart, dayEnd));
         }
 
         return availableSlots;
     }
+
 }
 

@@ -4,12 +4,13 @@ import sae.semestre.six.doctor.dto.DoctorShortDto;
 import sae.semestre.six.patient.dto.PatientShortDto;
 import sae.semestre.six.room.dto.RoomDto;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class AppointmentDto {
     private Long id;
     private String appointmentNumber;
-    private Date date;
+    private LocalDateTime date;
     private String status;
     private String description;
     private int duration;
@@ -34,11 +35,11 @@ public class AppointmentDto {
         this.appointmentNumber = appointmentNumber;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

@@ -6,6 +6,7 @@ import sae.semestre.six.appointment.dao.AppointmentDaoImpl;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.room.model.Room;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -24,32 +25,24 @@ public class RoomService {
      * @param durationMinutes   La durée du rendez-vous en minutes
      * @return true si la salle est disponible, false s'il y a un chevauchement
      */
-    public boolean isRoomAvailable(Room room, Date appointmentDate, int durationMinutes) {
+    public boolean isRoomAvailable(Room room, LocalDateTime appointmentDate, int durationMinutes) {
         List<Appointment> roomAppointments = appointmentDao.findByRoomIdByDate(room.getId(), appointmentDate);
 
-        Calendar startCal = Calendar.getInstance();
-        startCal.setTime(appointmentDate);
-
-        Calendar endCal = (Calendar) startCal.clone();
-        endCal.add(Calendar.MINUTE, durationMinutes);
-
-        Date newStart = startCal.getTime();
-        Date newEnd = endCal.getTime();
+        LocalDateTime newStart = appointmentDate;
+        LocalDateTime newEnd = newStart.plusMinutes(durationMinutes);
 
         for (Appointment appointment : roomAppointments) {
-            Date existingStart = appointment.getDate();
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(existingStart);
-            cal.add(Calendar.MINUTE, appointment.getDuration());
-            Date existingEnd = cal.getTime();
+            LocalDateTime existingStart = appointment.getDate();
+            LocalDateTime existingEnd = existingStart.plusMinutes(appointment.getDuration());
 
-            // Chevauchement
-            if (newStart.before(existingEnd) && newEnd.after(existingStart)) {
+            // Vérifie s’il y a chevauchement
+            if (newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart)) {
                 return false;
             }
         }
 
         return true;
     }
+
 
 }

@@ -19,6 +19,7 @@ import sae.semestre.six.appointment.request.AvailableSlotRequest;
 import sae.semestre.six.appointment.service.AppointmentService;
 import sae.semestre.six.timeslot.TimeSlot;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +49,7 @@ public class AppointmentController {
     @PostMapping("/appointment")
     public ResponseEntity<?> scheduleAppointment(@RequestBody AppointmentRequest request) {
         try {
-            Appointment result = appointmentService.scheduleAppointment(
-                    request.getDoctorNumber(),
-                    request.getPatientNumber(),
-                    request.getRoomNumber(),
-                    request.getAppointmentDate(),
-                    request.getDuration()
-            );
+            Appointment result = appointmentService.scheduleAppointment(request);
             return ResponseEntity.ok(AppointmentMapper.toDto(result));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -100,14 +95,14 @@ public class AppointmentController {
     /**
      * Récupère les rendez-vous planifiés dans une plage de dates donnée.
      *
-     * @param startDate {@link Date} date de début de la plage
-     * @param endDate   {@link Date} date de fin de la plage
+     * @param startDate {@link LocalDateTime} date de début de la plage
+     * @param endDate   {@link LocalDateTime} date de fin de la plage
      * @return {@link ResponseEntity} contenant une {@link List} de {@link Appointment}
      */
     @GetMapping("/appointments/range")
     public ResponseEntity<List<Appointment>> getAppointmentsByDateRange(
-            @RequestParam Date startDate,
-            @RequestParam Date endDate) {
+            @RequestParam LocalDateTime startDate,
+            @RequestParam LocalDateTime endDate) {
         return ResponseEntity.ok(appointmentService.getAppointmentsByDateRange(startDate, endDate));
     }
 }

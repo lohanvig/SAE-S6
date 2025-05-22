@@ -1,17 +1,18 @@
 package sae.semestre.six.appointment.request;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class AvailableSlotRequest {
 
     private String doctorId;
-    private Date date;
+    private LocalDateTime date;
 
     public String getDoctorId() {
         return doctorId;
     }
 
-    public Date getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 }

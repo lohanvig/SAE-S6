@@ -4,6 +4,7 @@ import sae.semestre.six.appointment.model.Appointment;
 import org.springframework.stereotype.Repository;
 import sae.semestre.six.base.dao.AbstractHibernateDao;
 
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -31,32 +32,22 @@ public class AppointmentDaoImpl extends AbstractHibernateDao<Appointment, Long> 
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Appointment> findByDoctorIdByDate(Long doctorId, Date appointmentDate) {
-        Calendar start = Calendar.getInstance();
-        start.setTime(appointmentDate);
-        start.set(Calendar.HOUR_OF_DAY, 0);
-        start.set(Calendar.MINUTE, 0);
-        start.set(Calendar.SECOND, 0);
-        start.set(Calendar.MILLISECOND, 0);
-
-        Calendar end = (Calendar) start.clone();
-        end.set(Calendar.HOUR_OF_DAY, 23);
-        end.set(Calendar.MINUTE, 59);
-        end.set(Calendar.SECOND, 59);
-        end.set(Calendar.MILLISECOND, 999);
+    public List<Appointment> findByDoctorIdByDate(Long doctorId, LocalDateTime appointmentDate) {
+        LocalDateTime start = appointmentDate.toLocalDate().atStartOfDay();
+        LocalDateTime end = appointmentDate.toLocalDate().atTime(23, 59, 59, 999_999_999);
 
         return getEntityManager()
                 .createQuery("FROM Appointment WHERE doctor.id = :doctorId AND date BETWEEN :start AND :end")
                 .setParameter("doctorId", doctorId)
-                .setParameter("start", start.getTime())
-                .setParameter("end", end.getTime())
+                .setParameter("start", start)
+                .setParameter("end", end)
                 .getResultList();
     }
 
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<Appointment> findByDateRange(Date startDate, Date endDate) {
+    public List<Appointment> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return getEntityManager()
                 .createQuery("FROM Appointment WHERE date BETWEEN :startDate AND :endDate")
                 .setParameter("startDate", startDate)
@@ -65,26 +56,15 @@ public class AppointmentDaoImpl extends AbstractHibernateDao<Appointment, Long> 
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<Appointment> findByRoomIdByDate(Long roomId, Date date) {
-        Calendar startOfDay = Calendar.getInstance();
-        startOfDay.setTime(date);
-        startOfDay.set(Calendar.HOUR_OF_DAY, 0);
-        startOfDay.set(Calendar.MINUTE, 0);
-        startOfDay.set(Calendar.SECOND, 0);
-        startOfDay.set(Calendar.MILLISECOND, 0);
-
-        Calendar endOfDay = (Calendar) startOfDay.clone();
-        endOfDay.set(Calendar.HOUR_OF_DAY, 23);
-        endOfDay.set(Calendar.MINUTE, 59);
-        endOfDay.set(Calendar.SECOND, 59);
-        endOfDay.set(Calendar.MILLISECOND, 999);
+    public List<Appointment> findByRoomIdByDate(Long roomId, LocalDateTime date) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = date.toLocalDate().atTime(23, 59, 59, 999_999_999);
 
         return getEntityManager()
-                .createQuery("FROM Appointment WHERE room.id = :roomId AND date BETWEEN :start AND :end")
+                .createQuery("FROM Appointment WHERE room.id = :roomId AND date BETWEEN :start AND :end", Appointment.class)
                 .setParameter("roomId", roomId)
-                .setParameter("start", startOfDay.getTime())
-                .setParameter("end", endOfDay.getTime())
+                .setParameter("start", startOfDay)
+                .setParameter("end", endOfDay)
                 .getResultList();
     }
 

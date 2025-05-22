@@ -1,12 +1,12 @@
 package sae.semestre.six.appointment.request;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class AppointmentRequest {
     private String doctorNumber;
     private String patientNumber;
     private String roomNumber;
-    private Date appointmentDate;
+    private LocalDateTime appointmentDate;
     private int duration;
 
 
@@ -22,7 +22,7 @@ public class AppointmentRequest {
         return roomNumber;
     }
 
-    public Date getAppointmentDate() {
+    public LocalDateTime getAppointmentDate() {
         return appointmentDate;
     }
 

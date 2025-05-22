@@ -7,7 +7,10 @@ import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.doctor.model.Doctor;
 import sae.semestre.six.room.model.Room;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,17 +42,12 @@ class AppointmentTest {
     @Test
     void testOverlappingAppointments() {
         // Créneau demandé : 10h00 - 10h30
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 10);
-        cal.set(Calendar.MINUTE, 0);
-        appointment.setDate(cal.getTime());
+        LocalDateTime requestedStart = LocalDateTime.of(2025, 5, 22, 10, 0);
+        appointment.setDate(requestedStart);
 
-        // Créneau existant : 10h15 - 10h45 (chevauchement avec celui demandé)
-        Calendar existingCal = Calendar.getInstance();
-        existingCal.set(Calendar.HOUR_OF_DAY, 10);
-        existingCal.set(Calendar.MINUTE, 15);
+        // Créneau existant : 10h15 - 10h45 (chevauchement)
         Appointment existing = new Appointment();
-        existing.setDate(existingCal.getTime());
+        existing.setDate(LocalDateTime.of(2025, 5, 22, 10, 15));
         existing.setDuration(30);
 
         List<Appointment> doctorAppointments = List.of(existing);
@@ -62,24 +60,18 @@ class AppointmentTest {
 
     @Test
     void testAppointmentOutsideDoctorHoursThrowsException() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 8); // avant 9h
-        cal.set(Calendar.MINUTE, 0);
-        appointment.setDate(cal.getTime());
-
+        appointment.setDate(LocalDateTime.of(2025, 5, 22, 8, 0)); // avant 9h
         assertThrows(UnvailableException.class,
                 () -> appointment.validateSlot(new ArrayList<>(), new ArrayList<>()));
     }
 
     @Test
     void testConflictingDoctorAppointmentThrowsException() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 10);
-        cal.set(Calendar.MINUTE, 0);
-        appointment.setDate(cal.getTime());
+        LocalDateTime date = LocalDateTime.of(2025, 5, 22, 10, 0);
+        appointment.setDate(date);
 
         Appointment existing = new Appointment();
-        existing.setDate(cal.getTime());
+        existing.setDate(date);
         existing.setDuration(30);
 
         List<Appointment> doctorAppointments = Collections.singletonList(existing);
@@ -91,13 +83,11 @@ class AppointmentTest {
 
     @Test
     void testConflictingRoomAppointmentThrowsException() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 11);
-        cal.set(Calendar.MINUTE, 0);
-        appointment.setDate(cal.getTime());
+        LocalDateTime date = LocalDateTime.of(2025, 5, 22, 11, 0);
+        appointment.setDate(date);
 
         Appointment existing = new Appointment();
-        existing.setDate(cal.getTime());
+        existing.setDate(date);
         existing.setDuration(30);
 
         List<Appointment> doctorAppointments = new ArrayList<>();
@@ -109,10 +99,7 @@ class AppointmentTest {
 
     @Test
     void testValidAppointmentDoesNotThrow() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, 14);
-        cal.set(Calendar.MINUTE, 0);
-        appointment.setDate(cal.getTime());
+        appointment.setDate(LocalDateTime.of(2025, 5, 22, 14, 0));
 
         List<Appointment> doctorAppointments = new ArrayList<>();
         List<Appointment> roomAppointments = new ArrayList<>();
