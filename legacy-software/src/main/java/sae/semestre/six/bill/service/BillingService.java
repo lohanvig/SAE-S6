@@ -12,6 +12,8 @@ import sae.semestre.six.doctor.model.Doctor;
 import sae.semestre.six.patient.dao.PatientDao;
 import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.service.EmailService;
+import sae.semestre.six.treatment.model.Treatment;
+import sae.semestre.six.treatment.service.TreatmentService;
 import sae.semestre.six.utils.FileInitializer;
 import sae.semestre.six.bill.model.Bill;
 
@@ -36,6 +38,9 @@ public class BillingService {
 
     @Autowired
     private BillDaoImpl billDao;
+
+    @Autowired
+    private TreatmentService treatmentService;
 
     @Value("${admin.email}")
     private String adminEmail;
@@ -133,5 +138,18 @@ public class BillingService {
         );
 
         return bill.getBillNumber();
+    }
+
+    @Transactional
+    public void updateTreatmentInBill(String billNumber, String treatmentName, double newPrice, int newQuantity) {
+        Bill bill;
+        try {
+            bill = billDao.findByBillNumber(billNumber);
+        } catch (Exception e) {
+            throw new NoSuchElementException("Facture non trouvée");
+        }
+
+        bill.updateBillDetails(treatmentName, newPrice, newQuantity);
+        billDao.save(bill);
     }
 } 

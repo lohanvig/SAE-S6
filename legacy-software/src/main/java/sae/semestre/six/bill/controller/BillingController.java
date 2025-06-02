@@ -37,6 +37,23 @@ public class BillingController {
         }
     }
 
+    @PutMapping("/update-treatment")
+    public ResponseEntity<?> updateTreatmentInBill(
+            @RequestParam String billNumber,
+            @RequestParam String treatmentName,
+            @RequestParam double newPrice,
+            @RequestParam int newQuantity
+    ) {
+        try {
+            billService.updateTreatmentInBill(billNumber, treatmentName, newPrice, newQuantity);
+            return ResponseEntity.ok(Map.of("success", "Treatment updated successfully"));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "An error occurred while updating the treatment: "
+                                                           + e.getMessage()));
+        }    }
+
     @PutMapping("/price")
     public String updatePrice(
             @RequestParam String treatment,

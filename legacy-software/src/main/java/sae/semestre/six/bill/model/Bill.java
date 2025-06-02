@@ -121,4 +121,22 @@ public class Bill {
         this.setTotalAmount(this.getTotalAmount() + detail.getUnitPrice());
         this.applyDiscount(discountAmount, discountRate);
     }
+
+    /**
+     * Updates the details of a specific treatment in the bill.
+     * @param treatmentName the name of the treatment to update
+     * @param newPrice the new price for the treatment
+     * @param newQuantity the new quantity for the treatment
+     */
+    public void updateBillDetails(String treatmentName, double newPrice, int newQuantity) {
+        for (BillDetail detail : billDetails) {
+            if (detail.getTreatmentName().equalsIgnoreCase(treatmentName)) {
+                detail.setUnitPrice(newPrice);
+                detail.setQuantity(newQuantity);
+                this.setTotalAmount(this.getTotalAmount() + (newPrice * newQuantity));
+                this.applyDiscount(100.0f, 0.9f); // Example discount logic
+                break;
+            }
+        }
+    }
 }
