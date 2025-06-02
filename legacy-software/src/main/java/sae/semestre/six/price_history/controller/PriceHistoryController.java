@@ -6,21 +6,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sae.semestre.six.price_history.dao.Price_historyDao;
+import sae.semestre.six.price_history.dao.PriceHistoryDao;
 import sae.semestre.six.price_history.model.PriceHistory;
-import sae.semestre.six.price_history.service.Price_historyService;
+import sae.semestre.six.price_history.service.PriceHistoryService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/price_history")
-public class Price_historyController {
+public class PriceHistoryController {
+
+    private PriceHistoryDao priceHistoryDao;
 
     @Autowired
-    private Price_historyDao priceHistoryDao;
-
-    @Autowired
-    private Price_historyService priceHistoryService;
+    private PriceHistoryService priceHistoryService;
 
     @GetMapping("/prices")
     public ResponseEntity<?> getAllItems() {

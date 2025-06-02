@@ -1,6 +1,6 @@
 package sae.semestre.six.price_history.dao;
 
-public class Price_historyDaoImpl {
+public class PriceHistoryDaoImpl {
 
     // @Override
     // public PriceHistory findByItemCode(String itemCode) {
