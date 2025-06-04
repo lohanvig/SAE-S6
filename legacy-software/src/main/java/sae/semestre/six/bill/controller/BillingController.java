@@ -1,8 +1,11 @@
 package sae.semestre.six.bill.controller;
 
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import sae.semestre.six.bill.dao.BillDaoImpl;
+import sae.semestre.six.bill.model.Bill;
 import sae.semestre.six.bill.service.BillingService;
 import java.util.*;
 
@@ -11,8 +14,6 @@ import java.util.*;
 public class BillingController {
 
     private Map<String, Double> priceList = new HashMap<>();
-    private double totalRevenue = 0.0;
-    private List<String> pendingBills = new ArrayList<>();
 
     @Autowired
     private BillingService billService; // Injection automatique du service
@@ -37,36 +38,10 @@ public class BillingController {
         }
     }
 
-    @PutMapping("/update-treatment")
-    public ResponseEntity<?> updateTreatmentInBill(
-            @RequestParam String billNumber,
-            @RequestParam String treatmentName,
-            @RequestParam double newPrice,
-            @RequestParam int newQuantity
-    ) {
-        try {
-            billService.updateTreatmentInBill(billNumber, treatmentName, newPrice, newQuantity);
-            return ResponseEntity.ok(Map.of("success", "Treatment updated successfully"));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Map.of("error", "An error occurred while updating the treatment: "
-                                                           + e.getMessage()));
-        }    }
-
-    @PutMapping("/price")
-    public String updatePrice(
-            @RequestParam String treatment,
-            @RequestParam double price) {
-        priceList.put(treatment, price);
-        recalculateAllPendingBills();
-        return "Price updated";
-    }
-
-    private void recalculateAllPendingBills() {
-        for (String billId : pendingBills) {
-            processBill(billId, "RECALC", new String[]{"CONSULTATION"});
-        }
+    @GetMapping("/integrity")
+    public ResponseEntity<?> verifyAllBillIntegrity() {
+        List<Map<String, Object>> integrityResults = billService.verifyAllBillsIntegrity();
+        return ResponseEntity.ok(integrityResults);
     }
 
     @GetMapping("/prices")
@@ -74,19 +49,30 @@ public class BillingController {
         return priceList;
     }
 
-    @GetMapping("/insurance")
-    public String calculateInsurance(@RequestParam double amount) {
-        double coverage = amount;
-        return "Insurance coverage: $" + coverage;
+    @GetMapping("/prices/{billNumber}")
+    public ResponseEntity<?> getBillTotal(@PathVariable String billNumber) {
+        try {
+            double total = billService.getBillTotal(billNumber);
+            Map<String, Object> response = new HashMap<>();
+            response.put("billNumber", billNumber);
+            response.put("totalAmount", total);
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("/revenue")
-    public String getTotalRevenue() {
-        return "Total Revenue: $" + totalRevenue;
+    public ResponseEntity<?> getTotalRevenue() {
+        return ResponseEntity.ok(Map.of("info", "Total Revenue: $" + billService.getTotalRevenue()));
     }
 
     @GetMapping("/pending")
-    public List<String> getPendingBills() {
-        return pendingBills;
+    public ResponseEntity<?> getPendingBills() {
+        try {
+            return ResponseEntity.status(200).body(Map.of("bills", billService.getPendingBills()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
 }

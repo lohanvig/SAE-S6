@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sae.semestre.six.bill.dao.BillDaoImpl;
+import sae.semestre.six.bill.enums.BillStatus;
 import sae.semestre.six.bill.model.Bill;
 import sae.semestre.six.bill.model.BillDetail;
 import sae.semestre.six.doctor.dao.DoctorDao;
@@ -58,11 +59,6 @@ public class BillingService {
     );
 
     /**
-     * Représente le chiffre d'affaires total généré.
-     */
-    private double totalRevenue = 0.0;
-
-    /**
      * Montant maximum avant remise
      */
     private final static int DISCOUNT_AMOUNT = 500;
@@ -111,6 +107,8 @@ public class BillingService {
 
         double total = bill.getTotalAmount();
 
+        bill.lock();
+
         // Écriture dans un fichier texte de sauvegarde
         File billFile = new File(FileInitializer.BILL_FOLDER + bill.getBillNumber() + ".txt");
 
@@ -128,7 +126,6 @@ public class BillingService {
         }
 
         // Enregistrement en base et envoi d'e-mail de notification
-        totalRevenue += total;
         billDao.save(bill);
 
         emailService.sendEmail(
@@ -140,16 +137,48 @@ public class BillingService {
         return bill.getBillNumber();
     }
 
-    @Transactional
-    public void updateTreatmentInBill(String billNumber, String treatmentName, double newPrice, int newQuantity) {
+    public Double getTotalRevenue() {
+        Double revenue = billDao.getTotalRevenue();
+        return revenue != null ? revenue : 0.0;
+    }
+
+    public List<Bill> getPendingBills() {
+        return billDao.findByStatus(BillStatus.PENDING.toString());
+    }
+
+    public List<Map<String, Object>> verifyAllBillsIntegrity() {
+        List<Map<String, Object>> integrityResults = new ArrayList<>();
+        List<Bill> bills = billDao.findAll();
+
+        for (Bill bill : bills) {
+            Map<String, Object> result = new HashMap<>();
+            result.put("billNumber", bill.getBillNumber());
+
+            try {
+                String storedHash = bill.getHash();
+                String computedHash = bill.recalculateHash();
+
+                boolean isValid = storedHash != null && storedHash.equals(computedHash);
+                result.put("isValid", isValid);
+            } catch (Exception e) {
+                result.put("isValid", false);
+            }
+
+            integrityResults.add(result);
+        }
+
+        return integrityResults;
+    }
+
+    public double getBillTotal(String billNumber) {
         Bill bill;
         try {
             bill = billDao.findByBillNumber(billNumber);
         } catch (Exception e) {
-            throw new NoSuchElementException("Facture non trouvée");
+            throw new NoSuchElementException("Facture non trouvée " + billNumber);
         }
 
-        bill.updateBillDetails(treatmentName, newPrice, newQuantity);
-        billDao.save(bill);
+        return bill.getTotalAmount();
     }
+
 } 

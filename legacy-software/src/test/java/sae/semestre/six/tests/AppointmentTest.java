@@ -1,4 +1,4 @@
-package sae.semestre.six.tests.regression;
+package sae.semestre.six.tests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

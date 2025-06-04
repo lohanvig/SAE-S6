@@ -29,23 +29,4 @@ public class BillingControllerTest {
         assertNotNull(id, "La réponse ne doit pas être nulle.");
         assertTrue(id.startsWith("BILL"), "Le numéro de facture doit commencer par 'BILL'.");
     }
-
-    @Test
-    public void testCalculateInsurance() {
-        
-        double result = Double.parseDouble(
-            billingController.calculateInsurance(1000.0)
-                .replace("Insurance coverage: $", "")
-        );
-        
-        
-        assertEquals(700.0, result, 0.01);
-    }
-    
-    
-    @Test
-    public void testUpdatePrice() {
-        billingController.updatePrice("CONSULTATION", 75.0);
-        assertEquals(75.0, billingController.getPrices().get("CONSULTATION"), 0.01);
-    }
 } 

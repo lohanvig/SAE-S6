@@ -1,13 +1,18 @@
 package sae.semestre.six.bill.model;
 
 import jakarta.persistence.*;
+import sae.semestre.six.bill.enums.BillStatus;
 import sae.semestre.six.doctor.model.Doctor;
 import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.patient.model.PatientHistory;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "bills")
@@ -36,7 +41,7 @@ public class Bill {
     private Double totalAmount = 0.0;
     
     @Column(name = "status")
-    private String status = "PENDING";
+    private String status = BillStatus.PENDING.toString();
     
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<BillDetail> billDetails = new HashSet<>();
@@ -47,9 +52,6 @@ public class Bill {
     
     @Column(name = "last_modified")
     private Date lastModified = new Date();
-
-    @Column(name = "locked")
-    private boolean locked;
 
     @Column(name = "hash")
     private String hash;
@@ -83,23 +85,49 @@ public class Bill {
         this.lastModified = new Date(); 
     }
 
-    public boolean isLocked() { return locked; }
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
 
     public void lock() {
-        if (this.isLocked()) {
+        if (this.hash != null) {
             throw new IllegalArgumentException("Cette facture est déjà vérouillée.");
         }
 
-        //TODO : faire le hash le sauvegarde et vérouiller la facture
-
+        this.hash = hashInvoice(); // Génére et sauvegarde le hash
     }
 
-    public void isInvoiceTampered() {
-        //TODO : hash la facture courante et vérifie que le hash soit le meme que celui enregistré
+    public String recalculateHash() {
+        return hashInvoice();
     }
 
-    private void hashInvoice() {
-        //TODO : complète en hashan toutes les infos de la facture
+    private String hashInvoice() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(billNumber != null ? billNumber : "");
+        sb.append(patient != null ? patient.getId() : "");
+        sb.append(doctor != null ? doctor.getId() : "");
+        sb.append(billDate != null ? billDate.getTime() : "");
+        sb.append(String.format("%.2f", totalAmount));
+        sb.append(status != null ? status : "");
+
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = digest.digest(sb.toString().getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                hexString.append(String.format("%02x", b));
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Erreur lors du calcul du hash", e);
+        }
     }
 
     public Set<BillDetail> getBillDetails() { return billDetails; }
@@ -146,23 +174,5 @@ public class Bill {
 
         this.setTotalAmount(this.getTotalAmount() + detail.getUnitPrice());
         this.applyDiscount(discountAmount, discountRate);
-    }
-
-    /**
-     * Updates the details of a specific treatment in the bill.
-     * @param treatmentName the name of the treatment to update
-     * @param newPrice the new price for the treatment
-     * @param newQuantity the new quantity for the treatment
-     */
-    public void updateBillDetails(String treatmentName, double newPrice, int newQuantity) {
-        for (BillDetail detail : billDetails) {
-            if (detail.getTreatmentName().equalsIgnoreCase(treatmentName)) {
-                detail.setUnitPrice(newPrice);
-                detail.setQuantity(newQuantity);
-                this.setTotalAmount(this.getTotalAmount() + (newPrice * newQuantity));
-                this.applyDiscount(100.0f, 0.9f); // Example discount logic
-                break;
-            }
-        }
     }
 }

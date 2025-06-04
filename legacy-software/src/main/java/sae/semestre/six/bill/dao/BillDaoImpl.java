@@ -53,4 +53,13 @@ public class BillDaoImpl extends AbstractHibernateDao<Bill, Long> implements Bil
                 .setParameter("status", status)
                 .getResultList();
     }
+
+    public Double getTotalRevenue() {
+        return getEntityManager()
+                .createQuery(
+                        "SELECT SUM(b.totalAmount) FROM Bill b WHERE b.hash IS NOT NULL",
+                        Double.class
+                )
+                .getSingleResult();
+    }
 } 
