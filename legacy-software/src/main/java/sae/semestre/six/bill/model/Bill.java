@@ -48,6 +48,12 @@ public class Bill {
     @Column(name = "last_modified")
     private Date lastModified = new Date();
 
+    @Column(name = "locked")
+    private boolean locked;
+
+    @Column(name = "hash")
+    private String hash;
+
     @ManyToOne
     private PatientHistory patientHistory;
     
@@ -76,6 +82,26 @@ public class Bill {
         this.status = status;
         this.lastModified = new Date(); 
     }
+
+    public boolean isLocked() { return locked; }
+
+    public void lock() {
+        if (this.isLocked()) {
+            throw new IllegalArgumentException("Cette facture est déjà vérouillée.");
+        }
+
+        //TODO : faire le hash le sauvegarde et vérouiller la facture
+
+    }
+
+    public void isInvoiceTampered() {
+        //TODO : hash la facture courante et vérifie que le hash soit le meme que celui enregistré
+    }
+
+    private void hashInvoice() {
+        //TODO : complète en hashan toutes les infos de la facture
+    }
+
     public Set<BillDetail> getBillDetails() { return billDetails; }
     public void setBillDetails(Set<BillDetail> billDetails) { this.billDetails = billDetails; }
 

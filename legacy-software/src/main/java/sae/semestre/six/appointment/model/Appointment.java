@@ -7,11 +7,8 @@ import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.patient.model.PatientHistory;
 import sae.semestre.six.room.model.Room;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Entity
