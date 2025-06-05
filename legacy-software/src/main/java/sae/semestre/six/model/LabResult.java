@@ -1,10 +1,14 @@
 package sae.semestre.six.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import sae.semestre.six.patient.model.PatientHistory;
 
 import java.util.Date;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "lab_results")
 public class LabResult {
@@ -29,23 +33,6 @@ public class LabResult {
     
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
-    
-    
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    
-    public PatientHistory getPatientHistory() { return patientHistory; }
-    public void setPatientHistory(PatientHistory patientHistory) { this.patientHistory = patientHistory; }
-    
-    public String getTestName() { return testName; }
-    public void setTestName(String testName) { this.testName = testName; }
-    
-    public String getResultValue() { return resultValue; }
-    public void setResultValue(String resultValue) { this.resultValue = resultValue; }
-    
-    public Date getTestDate() { return testDate; }
-    public void setTestDate(Date testDate) { this.testDate = testDate; }
-    
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
-} 
+
+
+}

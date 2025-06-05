@@ -1,4 +1,4 @@
-package sae.semestre.six.model;
+package sae.semestre.six.insurance.model;
 
 import jakarta.persistence.*;
 import sae.semestre.six.patient.model.Patient;

@@ -22,6 +22,12 @@ public class InventoryController {
     @Autowired
     private InventoryService inventoryService;
 
+
+    /**
+     * Récupère tous les articles de l'inventaire.
+     *
+     * @return ResponseEntity avec succes ou message d'erreur
+     */
     @GetMapping("/items")
     public ResponseEntity<?> getAllItems() {
         try {
@@ -32,6 +38,13 @@ public class InventoryController {
         }
     }
 
+
+    /**
+     * Récupère un article de l'inventaire par son ID.
+     *
+     * @param id Id de l'item a récupérer
+     * @return ResponseEntity avec succes ou message d'erreur
+     */
     @GetMapping("/item/{id}")
     public ResponseEntity<?> getItemById(@PathVariable Long id) {
         try {
@@ -46,6 +59,13 @@ public class InventoryController {
         }
     }
 
+
+    /**
+     * Ajoute un nouvel article à l'inventaire.
+     *
+     * @param invoice Les diférentes informations du nouveau produit
+     * @return ResponseEntity avec succes ou message d'erreur
+     */
     @PostMapping("/supplier-invoice")
     public ResponseEntity<?> processSupplierInvoice(@RequestBody SupplierInvoice invoice) {
         try {
@@ -56,6 +76,12 @@ public class InventoryController {
         }
     }
 
+
+    /**
+     * Récupère les articles en stock faible.
+     *
+     * @return ResponseEntity list des low stocks ou message erreur
+     */
     @GetMapping("/low-stock")
     public ResponseEntity<?> getLowStockItemsID() {
         try {
@@ -65,6 +91,12 @@ public class InventoryController {
         }
     }
 
+
+    /**
+     * Recommande de réapprovisionner les articles en stock faible.
+     *
+     * @return ResponseEntity avec le nombre d'articles réordonnés ou message d'erreur
+     */
     @PostMapping("/reorder")
     public ResponseEntity<?> reorderItems() {
         try {
@@ -75,6 +107,14 @@ public class InventoryController {
         }
     }
 
+
+    /**
+     * Change le prix d'un produit
+     *
+     * @param itemCode code de l'item à modifier le prix
+     * @param price le nouveua prix du produit
+     * @return ResponseEntity avec succes ou message d'erreur
+     */
     @PutMapping("/change-price/{itemCode}")
     public ResponseEntity<?> changePriceItems(@PathVariable String itemCode, @RequestParam Double price) {
         try {

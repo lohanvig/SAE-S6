@@ -1,6 +1,8 @@
 package sae.semestre.six.patient.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import sae.semestre.six.bill.model.Bill;
 import sae.semestre.six.appointment.model.Appointment;
 import sae.semestre.six.model.LabResult;
@@ -9,6 +11,8 @@ import sae.semestre.six.treatment.model.Treatment;
 
 import java.util.*;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "patient_history")
 public class PatientHistory {

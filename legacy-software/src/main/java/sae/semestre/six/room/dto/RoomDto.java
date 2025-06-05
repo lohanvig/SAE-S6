@@ -1,5 +1,10 @@
 package sae.semestre.six.room.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class RoomDto {
 
     private Long id;
@@ -7,7 +12,6 @@ public class RoomDto {
     private int floor;
     private String type;
 
-    // Constructors
     public RoomDto() {}
 
     public RoomDto(Long id, String roomNumber, int floor, String type) {
@@ -16,8 +20,6 @@ public class RoomDto {
         this.floor = floor;
         this.type = type;
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;

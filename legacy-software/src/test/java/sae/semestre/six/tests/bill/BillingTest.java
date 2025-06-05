@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import sae.semestre.six.bill.dao.BillDaoImpl;
 import sae.semestre.six.bill.model.Bill;
+import sae.semestre.six.bill.model.BillDetail;
 import sae.semestre.six.bill.service.BillingService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,11 +15,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
-class BillingServiceTest {
+class BillingTest {
 
     @InjectMocks
     private BillingService billingService;
-
 
     @Mock
     private BillDaoImpl billDao;
@@ -91,4 +91,56 @@ class BillingServiceTest {
         assertThrows(NoSuchElementException.class, () -> billingService.getBillTotal("X404"));
     }
 
+    @Test
+    void testAddBillDetailsWithNoDiscount() {
+        Bill bill = new Bill();
+        double price = 100.0;
+        float discountAmount = 1000.0f; // seuil jamais atteint
+        float discountRate = 0.9f; // 10% de remise
+
+        bill.addBillDetails("Consultation", price, discountAmount, discountRate);
+
+        assertEquals(100.0, bill.getTotalAmount());
+        assertEquals(1, bill.getBillDetails().size());
+        BillDetail detail = bill.getBillDetails().iterator().next();
+        assertEquals("Consultation", detail.getTreatmentName());
+        assertEquals(100.0, detail.getUnitPrice());
+        assertEquals(1, detail.getQuantity());
+        assertEquals(100.0, detail.getLineTotal());
+    }
+
+    @Test
+    void testAddBillDetailsWithDiscountApplied() {
+        Bill bill = new Bill();
+        double price = 1500.0;
+        float discountAmount = 1000.0f;
+        float discountRate = 0.8f; // 20% de remise
+
+        bill.addBillDetails("Surgery", price, discountAmount, discountRate);
+
+        assertEquals(1200.0, bill.getTotalAmount(), 0.1);
+        assertEquals(1, bill.getBillDetails().size());
+    }
+
+    @Test
+    void testBillLockThrowsIfAlreadyLocked() {
+        Bill bill = new Bill();
+        bill.setHash("someHash");
+
+        Exception exception = assertThrows(IllegalArgumentException.class, bill::lock);
+        assertEquals("Cette facture est déjà vérouillée.", exception.getMessage());
+    }
+
+    @Test
+    void testBillLockGeneratesHash() {
+        Bill bill = new Bill();
+        bill.setBillNumber("B500");
+        bill.setTotalAmount(100.0);
+        bill.setStatus("PENDING");
+
+        // Supposons que patient et doctor soient null ici
+        bill.lock();
+
+        assertNotNull(bill.getHash());
+    }
 }

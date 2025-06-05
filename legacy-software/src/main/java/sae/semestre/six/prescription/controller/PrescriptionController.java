@@ -1,5 +1,6 @@
 package sae.semestre.six.prescription.controller;
 
+import sae.semestre.six.bill.dto.TreatmentRequestDTO;
 import sae.semestre.six.patient.dao.PatientDao;
 import sae.semestre.six.prescription.dao.PrescriptionDao;
 import sae.semestre.six.patient.model.Patient;
@@ -77,7 +78,10 @@ public class PrescriptionController {
             billingService.processBill(
                 patientId,
                 "SYSTEM",
-                new String[]{"PRESCRIPTION_" + prescriptionId}
+                List.of(new TreatmentRequestDTO() {{
+                    setCode("PRESCRIPTION_" + prescriptionId);
+                    setQuantity(1);
+                }})
             );
             
             

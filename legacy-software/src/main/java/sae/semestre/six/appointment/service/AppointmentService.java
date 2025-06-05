@@ -101,7 +101,8 @@ public class AppointmentService {
 
         // Vérifie la validité du créneau
         List<Appointment> doctorAppointments = appointmentDao.findByDoctorId(doctor.getId());
-        List<Appointment> roomAppointments = appointmentDao.findByRoomIdByDate(room.getId(), data.getAppointmentDate());
+        List<Appointment> roomAppointments = appointmentDao.findByRoomIdByDate(room
+                .getId(), data.getAppointmentDate());
         appointment.validateSlot(doctorAppointments, roomAppointments);
 
         appointmentDao.save(appointment);

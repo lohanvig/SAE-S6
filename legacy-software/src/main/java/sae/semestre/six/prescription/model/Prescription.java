@@ -1,11 +1,15 @@
 package sae.semestre.six.prescription.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import sae.semestre.six.patient.model.Patient;
 
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "prescriptions")
 public class Prescription {
     
@@ -44,86 +48,84 @@ public class Prescription {
     
     
     public Prescription() {}
-    
-    
+
     public Long getId() {
         return id;
     }
-    
+
     public void setId(Long id) {
         this.id = id;
     }
-    
+
     public String getPrescriptionNumber() {
         return prescriptionNumber;
     }
-    
+
     public void setPrescriptionNumber(String prescriptionNumber) {
         this.prescriptionNumber = prescriptionNumber;
     }
-    
+
     public Patient getPatient() {
         return patient;
     }
-    
+
     public void setPatient(Patient patient) {
         this.patient = patient;
     }
-    
+
     public String getMedicines() {
         return medicines;
     }
-    
+
     public void setMedicines(String medicines) {
         this.medicines = medicines;
     }
-    
+
     public String getNotes() {
         return notes;
     }
-    
+
     public void setNotes(String notes) {
         this.notes = notes;
     }
-    
+
     public Double getTotalCost() {
         return totalCost;
     }
-    
+
     public void setTotalCost(Double totalCost) {
         this.totalCost = totalCost;
     }
-    
+
     public Boolean getBilled() {
         return isBilled;
     }
-    
+
     public void setBilled(Boolean billed) {
         isBilled = billed;
-        lastModified = new Date(); 
     }
-    
+
     public Boolean getInventoryUpdated() {
         return inventoryUpdated;
     }
-    
+
     public void setInventoryUpdated(Boolean inventoryUpdated) {
         this.inventoryUpdated = inventoryUpdated;
     }
-    
+
     public Date getCreatedDate() {
         return createdDate;
     }
-    
+
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
-    
+
     public Date getLastModified() {
         return lastModified;
     }
-    
+
     public void setLastModified(Date lastModified) {
         this.lastModified = lastModified;
     }
-} 
+}

@@ -20,12 +20,10 @@ public class PatientHistoryController {
             @RequestParam String keyword,
             @RequestParam Date startDate,
             @RequestParam Date endDate) {
-        
-        
-        List<PatientHistory> results = patientHistoryDao.searchByMultipleCriteria(
+
+
+        return patientHistoryDao.searchByMultipleCriteria(
             keyword, startDate, endDate);
-            
-        return results;
     }
     
     

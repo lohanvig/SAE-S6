@@ -1,4 +1,4 @@
-package sae.semestre.six.tests;
+package sae.semestre.six.tests.appointment;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

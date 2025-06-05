@@ -1,12 +1,15 @@
 package sae.semestre.six.patient.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
 public class PatientShortDto {
     private Long id;
     private String patientNumber;
     private String firstName;
     private String lastName;
-
-    // Getters et Setters
 
     public Long getId() {
         return id;

@@ -8,7 +8,21 @@ import sae.semestre.six.room.dto.RoomDto;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Classe utilitaire permettant de convertir des entités {@link Appointment}
+ * vers des objets {@link AppointmentDto} pour exposer les données côté client.
+ */
 public class AppointmentMapper {
+
+    /**
+     * Convertit une entité {@link Appointment} en un objet {@link AppointmentDto}.
+     * Cette méthode effectue également la conversion des objets liés :
+     * patient, médecin et salle.
+     *
+     * @param appointment l'entité {@link Appointment} à convertir
+     * @return un objet {@link AppointmentDto} contenant les données à exposer,
+     * ou {@code null} si l'entrée est {@code null}
+     */
     public static AppointmentDto toDto(Appointment appointment) {
         if (appointment == null) { return null; }
 
@@ -44,6 +58,13 @@ public class AppointmentMapper {
         return dto;
     }
 
+    /**
+     * Convertit une liste d'entités {@link Appointment} en une liste d'objets {@link AppointmentDto}.
+     * Chaque entité est transformée à l'aide de la méthode {@link #toDto(Appointment)}.
+     *
+     * @param appointments la liste d'entités {@link Appointment} à convertir
+     * @return une liste de {@link AppointmentDto} représentant les rendez-vous
+     */
     public static List<AppointmentDto> ListToDto(List<Appointment> appointments) {
         ArrayList<AppointmentDto> dtoList = new ArrayList<>();
         for (Appointment appointment:

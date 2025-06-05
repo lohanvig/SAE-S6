@@ -5,18 +5,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sae.semestre.six.bill.dao.BillDaoImpl;
+import sae.semestre.six.bill.dto.TreatmentRequestDTO;
 import sae.semestre.six.bill.enums.BillStatus;
 import sae.semestre.six.bill.model.Bill;
-import sae.semestre.six.bill.model.BillDetail;
 import sae.semestre.six.doctor.dao.DoctorDao;
 import sae.semestre.six.doctor.model.Doctor;
+import sae.semestre.six.insurance.service.InsuranceService;
+import sae.semestre.six.inventory.service.InventoryService;
 import sae.semestre.six.patient.dao.PatientDao;
 import sae.semestre.six.patient.model.Patient;
 import sae.semestre.six.service.EmailService;
-import sae.semestre.six.treatment.model.Treatment;
-import sae.semestre.six.treatment.service.TreatmentService;
 import sae.semestre.six.utils.FileInitializer;
-import sae.semestre.six.bill.model.Bill;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -25,63 +24,57 @@ import java.util.*;
 
 /**
  * Service dédié à la gestion de la facturation des patients.
- * Il centralise la logique métier liée à la création d'une facture :
- * récupération des données, calcul du montant, écriture dans un fichier, envoi d'un e-mail.
+ * Il centralise la logique métier liée à la création d'une facture,
+ * la sauvegarde dans un fichier, l'enregistrement en base de données
+ * et l'envoi d'une notification par e-mail.
  */
 @Service
 public class BillingService {
 
+    /** DAO pour accéder aux patients. */
     @Autowired
     private PatientDao patientDao;
 
+    /** DAO pour accéder aux médecins. */
     @Autowired
     private DoctorDao doctorDao;
 
     @Autowired
+    private InventoryService inventoryService;
+
+    /** DAO personnalisé pour accéder aux factures. */
+    @Autowired
     private BillDaoImpl billDao;
 
-    @Autowired
-    private TreatmentService treatmentService;
-
+    /** Adresse e-mail de l'administrateur pour recevoir les notifications. */
     @Value("${admin.email}")
     private String adminEmail;
 
-    private final EmailService emailService = EmailService.getInstance();;
+    /** Service d'envoi d’e-mails (singleton). */
+    private final EmailService emailService = EmailService.getInstance();
 
+    /** Seuil de déclenchement d’une remise (en euros). */
+    private static final int DISCOUNT_AMOUNT = 500;
 
-    /**
-     * Liste des traitements et de leurs prix associés.
-     */
-    private final Map<String, Double> priceList = Map.of(
-            "CONSULTATION", 50.0,
-            "XRAY", 150.0,
-            "BLOOD_TEST", 100.0
-    );
+    /** Taux de remise (par exemple, 0.9 signifie 10 % de réduction). */
+    private static final float DISCOUNT_RATE = 0.9f;
 
-    /**
-     * Montant maximum avant remise
-     */
-    private final static int DISCOUNT_AMOUNT = 500;
+    @Autowired
+    private InsuranceService insuranceService;
 
     /**
-     * Montant de la remise
-     */
-    private final static float DISCOUNT_RATE = 0.9f;
-
-
-    /**
-     * Traite la facturation d'un patient à partir des traitements reçus
-     * et retourne une réponse JSON avec le détail de la facture.
+     * Traite la facturation d’un patient, génère la facture, l’enregistre,
+     * crée un fichier, et envoie un e-mail à l’administrateur.
      *
-     * @param patientId  identifiant du patient
-     * @param doctorNumber   identifiant du médecin
+     * @param patientId identifiant du patient (numéro)
+     * @param doctorNumber identifiant du médecin (numéro)
      * @param treatments liste des traitements appliqués
-     * @return un objet contenant le numéro de facture, le total, les identifiants et traitements
-     * @throws IOException en cas d'erreur d'écriture du fichier de facturation
+     * @return le numéro de facture généré
+     * @throws IOException en cas d’erreur d’écriture du fichier
      */
     @Transactional
-    public String processBill(String patientId, String doctorNumber, String[] treatments) throws IOException {
-        // Chargement des entités Patient et Doctor depuis la base de données
+    public String processBill(String patientId, String doctorNumber, List<TreatmentRequestDTO> treatments) throws IOException {
+        // Récupération du patient
         Patient patient;
         try {
             patient = patientDao.findByPatientNumber(patientId);
@@ -89,6 +82,7 @@ public class BillingService {
             throw new NoSuchElementException("Patient non trouvé");
         }
 
+        // Récupération du médecin
         Doctor doctor;
         try {
             doctor = doctorDao.findByDoctorNumber(doctorNumber);
@@ -99,20 +93,30 @@ public class BillingService {
         // Création de la facture
         Bill bill = Bill.createBill(patient, doctor);
 
-        // Création des lignes de facture
-        for (String treatment : treatments) {
-            double price = priceList.getOrDefault(treatment, 0.0);
-            bill.addBillDetails(treatment, price, DISCOUNT_AMOUNT, DISCOUNT_RATE);
+        // Ajout des traitements à la facture
+        for (TreatmentRequestDTO treatment : treatments) {
+            String code = treatment.getCode();
+            int quantity = treatment.getQuantity();
+
+            // Décrémente le stock et récupère le prix unitaire
+            double unitPrice;
+            try {
+                unitPrice = inventoryService.decreaseStock(code, quantity);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Erreur de stock pour le traitement : " + code + " - " + e.getMessage());
+            }
+
+            // Ajoute les détails à la facture (quantité * prix unitaire)
+            bill.addBillDetails(code, unitPrice * quantity, quantity, DISCOUNT_AMOUNT, DISCOUNT_RATE,
+                                insuranceService.getByPatientId(patient.getId()));
         }
 
         double total = bill.getTotalAmount();
-
         bill.lock();
 
-        // Écriture dans un fichier texte de sauvegarde
+        // Création du fichier de sauvegarde
         File billFile = new File(FileInitializer.BILL_FOLDER + bill.getBillNumber() + ".txt");
 
-        // Vérifier si le fichier existe, sinon le créer
         if (!billFile.exists()) {
             try {
                 billFile.createNewFile();
@@ -121,13 +125,15 @@ public class BillingService {
             }
         }
 
+        // Écriture du contenu dans le fichier
         try (FileWriter fw = new FileWriter(billFile, true)) {
             fw.write(bill.getBillNumber() + ": $" + total + "\n");
         }
 
-        // Enregistrement en base et envoi d'e-mail de notification
+        // Enregistrement en base de données
         billDao.save(bill);
 
+        // Notification par e-mail
         emailService.sendEmail(
                 adminEmail,
                 "New Bill Generated",
@@ -137,15 +143,31 @@ public class BillingService {
         return bill.getBillNumber();
     }
 
+    /**
+     * Récupère le chiffre d’affaires total généré par toutes les factures.
+     *
+     * @return le montant total (0.0 si aucune facture)
+     */
     public Double getTotalRevenue() {
         Double revenue = billDao.getTotalRevenue();
         return revenue != null ? revenue : 0.0;
     }
 
+    /**
+     * Récupère la liste des factures en attente de paiement.
+     *
+     * @return liste des factures en attente
+     */
     public List<Bill> getPendingBills() {
         return billDao.findByStatus(BillStatus.PENDING.toString());
     }
 
+    /**
+     * Vérifie l’intégrité de toutes les factures en comparant leur empreinte stockée
+     * à une empreinte recalculée à partir des données.
+     *
+     * @return liste des résultats de vérification pour chaque facture
+     */
     public List<Map<String, Object>> verifyAllBillsIntegrity() {
         List<Map<String, Object>> integrityResults = new ArrayList<>();
         List<Bill> bills = billDao.findAll();
@@ -170,6 +192,13 @@ public class BillingService {
         return integrityResults;
     }
 
+    /**
+     * Récupère le montant total d’une facture à partir de son numéro.
+     *
+     * @param billNumber numéro de la facture
+     * @return le montant total
+     * @throws NoSuchElementException si la facture n’existe pas
+     */
     public double getBillTotal(String billNumber) {
         Bill bill;
         try {
@@ -180,5 +209,4 @@ public class BillingService {
 
         return bill.getTotalAmount();
     }
-
-} 
+}

@@ -11,16 +11,27 @@ import sae.semestre.six.price_history.model.PriceHistory;
 import sae.semestre.six.price_history.service.PriceHistoryService;
 
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Contrôleur permettant de consulter l’historique des prix des articles en stock.
+ */
 @RestController
 @RequestMapping("/price_history")
 public class PriceHistoryController {
 
+    @Autowired
     private PriceHistoryDao priceHistoryDao;
 
     @Autowired
     private PriceHistoryService priceHistoryService;
 
+    /**
+     * Récupère tous les enregistrements de prix disponibles.
+     *
+     * @return {@link ResponseEntity} contenant une {@link List} de {@link PriceHistory}
+     * ou un message d'erreur en cas d'échec
+     */
     @GetMapping("/prices")
     public ResponseEntity<?> getAllItems() {
         try {
@@ -30,11 +41,18 @@ public class PriceHistoryController {
         }
     }
 
+    /**
+     * Récupère un enregistrement de prix en fonction de son identifiant unique.
+     *
+     * @param id identifiant de l'historique de prix à rechercher
+     * @return {@link ResponseEntity} contenant un objet {@link PriceHistory} si trouvé,
+     * ou un message d'erreur 404 si l'élément n’existe pas
+     */
     @GetMapping("/price/{id}")
     public ResponseEntity<?> getItemById(@PathVariable Long id) {
         try {
-            PriceHistory item = priceHistoryDao.findById(id);
-            if (item != null) {
+            Optional<PriceHistory> item = priceHistoryDao.findById(id);
+            if (item.isPresent()) {
                 return ResponseEntity.ok(item);
             } else {
                 return ResponseEntity.status(404).body("Item not found");
@@ -44,6 +62,13 @@ public class PriceHistoryController {
         }
     }
 
+    /**
+     * Récupère tous les enregistrements de prix associés à un article d'inventaire donné.
+     *
+     * @param inventoryId identifiant de l'article d'inventaire
+     * @return {@link ResponseEntity} contenant une {@link List} de {@link PriceHistory}
+     * ou un message d'erreur en cas d'échec
+     */
     @GetMapping("/price/inventory/{inventoryId}")
     public ResponseEntity<?> getItemsByInventoryId(@PathVariable Long inventoryId) {
         try {

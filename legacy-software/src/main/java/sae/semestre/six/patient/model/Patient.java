@@ -1,12 +1,16 @@
 package sae.semestre.six.patient.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import sae.semestre.six.appointment.model.Appointment;
 
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "patients")
 public class Patient {
@@ -40,11 +44,9 @@ public class Patient {
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     private Set<Appointment> appointments = new HashSet<>();
 
-    
     public Patient() {
     }
 
-    
     public Long getId() {
         return id;
     }
@@ -112,4 +114,8 @@ public class Patient {
     public Set<Appointment> getAppointments() {
         return appointments;
     }
-} 
+
+    public void setAppointments(Set<Appointment> appointments) {
+        this.appointments = appointments;
+    }
+}
